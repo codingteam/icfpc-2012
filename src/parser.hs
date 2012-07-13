@@ -1,8 +1,7 @@
 module Parser where
 
 import Prelude
-
-data Cell = Empty | Earth | Wall | Rock | Lambda | Robot | ClosedLift | OpenLift deriving (Show,Eq)
+import Lifter
 
 cell ch = case ch of ' ' -> Empty
                      '.' -> Earth
