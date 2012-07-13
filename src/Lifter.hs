@@ -16,5 +16,6 @@ type MineState = [[Cell]]
 data GameState = GameState {
     gmLambdas   :: Int,
     gmScore     :: Int,
-    gmMineState :: MineState
+    gmMineState :: MineState,
+    gmFinished  :: Bool
 } deriving Show
