@@ -12,7 +12,7 @@ test n (state, action) expected =
     let result = emulate state action
     in  if result == expected
         then putStrLn $ "Test " ++ (show n) ++ " ok."
-        else do putStrLn $ "Test " ++ (show n) ++ ":"
+        else do putStrLn $ "Test " ++ (show n) ++ " failed."
                 putStrLn $ " Real:     " ++ (show result)
                 putStrLn $ " Expected: " ++ (show expected)
 
