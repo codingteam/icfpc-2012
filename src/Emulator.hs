@@ -1,4 +1,4 @@
-module emulator (
+module Emulator (
     emulate
 ) where
 
