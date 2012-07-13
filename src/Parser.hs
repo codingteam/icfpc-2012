@@ -5,25 +5,32 @@ import System.IO
 
 import Lifter
 
-forEachLine :: (String -> IO a) -> IO [a]
-forEachLine fn = go []
+forEachLine :: (Int -> String -> IO a) -> IO [a]
+forEachLine fn = go [] 0
   where
-    go acc = do
+    go acc lineLength = do
       eof <- hIsEOF stdin
       if eof
         then return acc
         else do
              line <- getLine
+             let n = if lineLength == 0
+                       then length line
+                       else lineLength
              if null line
                then return acc
                else do
-                    res <- fn line
-                    next <- go acc
+                    res <- fn n line
+                    next <- go acc n
                     return (res: next)
 
 readInput :: IO MineState
-readInput = forEachLine (return . map cell)
+readInput = forEachLine $ \n line -> return (map cell $ pad n line)
   where
+    pad n str
+        | length str >= n = str
+        | otherwise       = str ++ replicate (n - length str) ' '
+
     cell ch = case ch of ' ' -> Empty
                          '.' -> Earth
                          '#' -> Wall
