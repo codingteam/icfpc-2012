@@ -4,15 +4,9 @@ module Emulator (
 
 import Data.List (findIndex)
 import Data.Maybe (fromJust)
+import Lifter
 
 lambdaScore = 25
-
-data Cell = Empty | Earth | Wall | Rock | Lambda | Robot | ClosedLift | OpenLift
-          deriving (Eq, Show)
-data Action = ALeft | ARight | AUp | ADown | AWait | AAbort
-            deriving (Eq, Show)
-
-type MineState = [[Cell]]
 
 mapi :: (a -> Int -> a) -> [a] -> [a]
 mapi fn xs = zipWith fn xs [0..]
