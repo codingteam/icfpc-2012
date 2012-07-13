@@ -16,21 +16,20 @@ test n (state, action) expected =
                 putStrLn $ " Real:     " ++ (show result)
                 putStrLn $ " Expected: " ++ (show expected)
 
+doTest :: Int -> MineState -> Action -> MineState -> Int -> Int -> Bool -> IO()
+doTest n field action field' lambdas score finished =
+    test n (GameState { gmMineState = field,
+                        gmLambdas   = 0,
+                        gmScore     = 0,
+                        gmFinished  = False }, action)
+           GameState { gmMineState = field',
+                     gmLambdas   = lambdas,
+                     gmScore     = score,
+                     gmFinished  = finished }
+
 main :: IO()
 main = do
-    test 1 (GameState { gmMineState = [[Robot, Lambda]],
-                        gmLambdas   = 0,
-                        gmScore     = 0,
-                        gmFinished  = False }, ARight)
-         GameState { gmMineState = [[Empty, Robot]],
-                     gmLambdas   = 1,
-                     gmScore     = 24,
-                     gmFinished  = False }
-    test 2 (GameState { gmMineState = [[Robot, Lambda, ClosedLift]],
-                        gmLambdas   = 0,
-                        gmScore     = 0,
-                        gmFinished  = False }, ARight)
-           GameState { gmMineState = [[Empty, Robot, OpenLift]],
-                       gmLambdas   = 1,
-                       gmScore     = 24,
-                       gmFinished  = False }
+    doTest 1 [[Robot, Lambda]] ARight
+             [[Empty, Robot]] 1 24 False
+    doTest 2 [[Robot, Lambda, ClosedLift]] ARight
+             [[Empty, Robot, OpenLift]] 1 24 False
