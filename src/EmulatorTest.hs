@@ -23,9 +23,9 @@ doTest n field action field' lambdas score finished =
                         gmScore     = 0,
                         gmFinished  = False }, action)
            GameState { gmMineState = field',
-                     gmLambdas   = lambdas,
-                     gmScore     = score,
-                     gmFinished  = finished }
+                       gmLambdas   = lambdas,
+                       gmScore     = score,
+                       gmFinished  = finished }
 
 main :: IO()
 main = do
