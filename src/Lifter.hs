@@ -18,4 +18,4 @@ data GameState = GameState {
     gmScore     :: Int,
     gmMineState :: MineState,
     gmFinished  :: Bool
-} deriving Show
+} deriving (Eq, Show)
