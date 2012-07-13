@@ -29,8 +29,8 @@ findRobot field =
     where hasRobot :: [Cell] -> Bool
           hasRobot cells = any (\c -> c == Robot) cells
 
-getRobotPos :: [[Cell]] -> Action -> Int -> Int -> (Int, Int)
-getRobotPos field action x y =
+getRobotPos :: [[Cell]] -> Action -> (Int, Int) -> (Int, Int)
+getRobotPos field action (x, y) =
     case action of
         AWait  -> (x, y)
         ALeft  -> (x - 1, y) -- TODO: Check left side
@@ -39,8 +39,8 @@ getRobotPos field action x y =
 move :: ([[Cell]], Int) -> Action -> ([[Cell]], Int)
 move (field, lambdas) action =
     let (x, y) = findRobot field
-        (x' , y') = getRobotPos field action x y
-        scoreDelta = if (field !! x' !! y') == Lambda then lambdaScore else 0
+        (x' , y') = getRobotPos field action (x, y)
+        scoreDelta = if (field !! y' !! x') == Lambda then lambdaScore else 0
         field' = replaceCell (replaceCell field (x, y) Empty) (x', y') Robot
     in  (field', scoreDelta - 1) -- -1 for any move, right?
 
@@ -59,4 +59,4 @@ main =
 test1 () =
     let field = [[Robot, Lambda]]
         action = ARight
-    in (emulate field action 0)
+    in  (emulate field action 0)
