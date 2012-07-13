@@ -5,14 +5,20 @@ module Main (
 import Emulator (emulate)
 import Lifter
 
-type TestCase = (MineState, Action)
+type TestCase = (GameState, Action)
+type Result   = (GameState, Bool)
 
-test :: TestCase -> MineState -> IO()
-test (field, action) expected =
-    let (field', _, _) = emulate field action 0
-    in  putStrLn $ "Real:     " ++ (show field') ++ "\n"
+test :: TestCase -> Result -> IO()
+test (state, action) expected =
+    let result = emulate state action
+    in  putStrLn $ "Real:     " ++ (show result) ++ "\n"
                 ++ "Expected: " ++ (show expected)
 
 main :: IO()
 main = do
-    test ([[Robot, Lambda]], ARight) [[Empty, Robot]]
+    test (GameState { gmMineState = [[Robot, Lambda]],
+                      gmLambdas   = 0,
+                      gmScore     = 0 }, ARight)
+         (GameState { gmMineState = [[Empty, Robot]],
+                      gmLambdas   = 1,
+                      gmScore     = 24 }, False)
