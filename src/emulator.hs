@@ -1,5 +1,5 @@
-module Main (
-    main
+module emulator (
+    emulate
 ) where
 
 import Data.List (findIndex)
@@ -53,12 +53,3 @@ emulate :: MineState -> Action -> Int -> (MineState, Int, Bool)
 emulate field action lambdas =
     let (field', scoreDelta, finished) = updateEnvironment $ move (field, lambdas) action
     in  (field', scoreDelta, finished)
-
-main :: IO()
-main =
-    putStrLn $ show $ test1 ()
-
-test1 () =
-    let field = [[Robot, Lambda]]
-        action = ARight
-    in  (emulate field action 0)
