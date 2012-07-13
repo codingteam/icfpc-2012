@@ -31,8 +31,8 @@ findRobot field =
     where hasRobot :: [Cell] -> Bool
           hasRobot cells = any (\c -> c == Robot) cells
 
-getRobotPos :: MineState -> Action -> Int -> Int -> (Int, Int)
-getRobotPos field action x y =
+getRobotPos :: MineState -> Action -> (Int, Int) -> (Int, Int)
+getRobotPos field action (x, y) =
     case action of
         AWait  -> (x, y)
         ALeft  -> (x - 1, y) -- TODO: Check left side
