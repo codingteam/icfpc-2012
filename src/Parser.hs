@@ -1,19 +1,25 @@
 
 module Parser where
 
+import System.IO
+
 import Lifter
 
 forEachLine :: (String -> IO a) -> IO [a]
 forEachLine fn = go []
   where
     go acc = do
-      line <- getLine
-      if null line
+      eof <- hIsEOF stdin
+      if eof
         then return acc
         else do
-             res <- fn line
-             next <- go acc
-             return (res: next)
+             line <- getLine
+             if null line
+               then return acc
+               else do
+                    res <- fn line
+                    next <- go acc
+                    return (res: next)
 
 readInput :: IO MineState
 readInput = forEachLine (return . map cell)
