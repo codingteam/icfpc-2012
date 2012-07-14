@@ -105,7 +105,7 @@ findRobot field =
     let rowIndex = fromJust $ findIndex hasRobot field
         row = (field !! rowIndex)
         cellIndex = findIndex (\c -> c == Robot) row
-    in  (rowIndex, fromJust $ cellIndex)
+    in  (fromJust cellIndex, rowIndex)
     where hasRobot :: [Cell] -> Bool
           hasRobot cells = any (\c -> c == Robot) cells
 
