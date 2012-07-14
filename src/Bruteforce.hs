@@ -6,7 +6,6 @@ import Control.Concurrent
 import Control.Concurrent.STM
 import Lifter
 import Emulator
-import Handler
 
 actionToChar :: Action -> Char
 actionToChar action =
@@ -18,9 +17,23 @@ actionToChar action =
     AWait  -> 'W'
     AAbort -> 'A'
 
-output :: (Int, [Actions]) -> IO ()
-output (_, actions) =
-  putStrLn $ map actionToChar actions
+output :: GameState -> IO ()
+output gameState =
+  do putStr $ map actionToChar $ gmActions gameState
+     putStr " "
+     putStrLn $ show $ gmScore gameState
 
-bruteforce :: Int -> GameState -> TVar (Int, [Actions]) -> IO ()
-bruteforce  = undefined
+bruteforce :: Int -> GameState -> TVar GameState -> IO ()
+bruteforce steps gameState var
+  | steps <= 0           = return ()
+  | gmFinished gameState = return ()
+  | otherwise            =
+    let handleAction action =
+          let nextGameState = emulate gameState action
+          in if gmScore gameState < gmScore nextGameState
+             then do atomically $ writeTVar var nextGameState
+                     bruteforce (steps - 1) nextGameState var
+             else bruteforce (steps - 1) nextGameState var
+    in do output gameState      -- debug output
+          sequence_ $ map handleAction [ALeft, ARight, AUp, ADown, AWait, AAbort]
+
