@@ -76,8 +76,15 @@ main = do
         [[Robot, Earth]] 0 0 ARight
         [[Empty, Robot]] 0 (-1) False
 
-    -- TODO: Moving rocks.
-    -- TODO: Immovable rocks.
+    -- Moving rocks:
+    doTest "moving rock"
+        [[Robot, Rock, Empty]] 0 0 ARight
+        [[Empty, Robot, Rock]] 0 (-1) False
+
+    -- Immovable rocks:
+    doTest "rock blocked by lambda"
+        [[Robot, Rock, Lambda]] 0 0 ARight
+        [[Robot, Rock, Lambda]] 0 (-1) False
 
     -- Taking lambdas:
     doTest "take"
