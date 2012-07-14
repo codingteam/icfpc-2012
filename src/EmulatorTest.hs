@@ -101,6 +101,8 @@ main = do
         [[Empty, Rock, Rock], [Robot, Empty, Empty]] 0 0 AWait
         [[Empty, Empty, Empty], [Robot, Rock, Rock]] 0 (-1) False
 
+    -- TODO: Double rock falling test.
+
     -- Sliding rocks:
     doTest "slide rock from a lambda"
         [[Robot, Rock, Empty], [Empty, Lambda, Empty]] 0 0 AWait
@@ -145,7 +147,7 @@ main = do
     -- Aborting the game in the pre-death conditions.
     doTest "emergency abort"
         [[Rock], [Empty], [Robot]] 1 0 AAbort
-        [[Empty], [Rock], [Robot]] 0 24 True
+        [[Empty], [Rock], [Robot]] 1 25 True
 
     -- Winning the game:
     doTest "win"
