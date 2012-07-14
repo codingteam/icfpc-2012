@@ -150,7 +150,7 @@ main = do
     -- Aborting the game in the pre-death conditions.
     doTest "emergency abort"
         [[Rock], [Empty], [Robot]] 1 0 AAbort
-        [[Empty], [Rock], [Robot]] 1 25 True
+        [[Rock], [Empty], [Robot]] 1 25 True
 
     -- Winning the game:
     doTest "win"
