@@ -25,16 +25,9 @@ processAction state action =
         score      = gmScore state
 
         field      = msField mineState
-        water      = msWater mineState
-        flooding   = msFlooding mineState
-        waterproof = msWaterproof mineState
-
 
         (field', robotPos') = moveRobot field action
-        mineState' = MineState { msField      = field',
-                                 msWater      = water,
-                                 msFlooding   = flooding,
-                                 msWaterproof = waterproof }
+        mineState' = mineState { msField      = field' }
 
         lambdaDelta = if hasObject field robotPos' Lambda then 1 else 0
         lambdas' = lambdas + lambdaDelta
