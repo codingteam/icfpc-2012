@@ -10,12 +10,13 @@ type Point = (Int, Int)
 
 lambdaScore = 25
 lambdaAbortScore = 25
+lambdaLiftScore = 50
 
 emulate :: GameState -> Action -> GameState
 emulate state action =
     let state'  = processAction state action
         state'' = processEnvironment state'
-    in  processFinishConditions state''
+    in  processFinishConditions state state''
 
 processAction :: GameState -> Action -> GameState
 processAction state action =
@@ -54,8 +55,27 @@ processEnvironment state =
                              gmScore     = score,
                              gmFinished  = finished }
 
-processFinishConditions :: GameState -> GameState
-processFinishConditions state = state -- TODO: Check win and lose conditions.
+processFinishConditions :: GameState -> GameState -> GameState
+processFinishConditions state state' =
+    let field    = gmMineState state
+        field'   = gmMineState state'
+        lambdas' = gmLambdas state'
+        score'   = gmScore state'
+
+        robotPosition' = findRobot field'
+    in if hasObject field robotPosition' OpenLift
+       then GameState { gmMineState = field',
+                        gmLambdas   = lambdas',
+                        gmScore     = score' + lambdas' * lambdaLiftScore,
+                        gmFinished  = True }
+       else let (x, y) = robotPosition'
+            in if hasObject field  (x, y - 1) Empty &&
+                  hasObject field' (x, y - 1) Rock
+               then GameState { gmMineState = field',
+                                gmLambdas   = lambdas',
+                                gmScore     = score',
+                                gmFinished  = True }
+               else state'
 
 moveRobot :: MineState -> Action -> (MineState, Point)
 moveRobot field action =
@@ -69,7 +89,9 @@ getObject :: MineState -> Point -> Cell
 getObject field (x, y) = field !! y !! x
 
 hasObject :: MineState -> Point -> Cell -> Bool
-hasObject field point object = getObject field point == object
+hasObject field (x, y) object =
+    x >= 0 && y >= 0 && x < sizeX field && y < sizeY field &&
+    getObject field (x, y) == object
 
 updateField :: MineState -> MineState
 updateField field =
@@ -115,4 +137,4 @@ noLambdas field =
     let width  = sizeX field
         height = sizeY field
     in  all (\p -> getObject field p /= Lambda) [(x, y) | x <- [0..width - 1],
-                                                          y <- [1..height - 1]]
+                                                          y <- [0..height - 1]]
