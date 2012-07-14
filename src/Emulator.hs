@@ -9,6 +9,7 @@ import Lifter
 type Point = (Int, Int)
 
 lambdaScore = 25
+lambdaAbortScore = 25
 
 emulate :: GameState -> Action -> GameState
 emulate state action =
@@ -19,22 +20,31 @@ emulate state action =
 processAction :: GameState -> Action -> GameState
 processAction state action =
     let field = gmMineState state
+        lambdas = gmLambdas state
+        score = gmScore state
 
         (field', robotPos') = moveRobot field action
-        lambdaDelta = if hasObject field robotPos' Lambda then 1 else 0
-        scoreDelta  = lambdaDelta * lambdaScore - 1
 
-        lambdas = gmLambdas state + lambdaDelta
-        score = gmScore state + scoreDelta
+        lambdaDelta = if hasObject field robotPos' Lambda then 1 else 0
+        lambdas' = lambdas + lambdaDelta
+
+        scoreDelta  = lambdaDelta * lambdaScore + if action == AAbort
+                                                  then lambdas' * lambdaAbortScore
+                                                  else -1
+        score' = score + scoreDelta
 
         finished = action == AAbort
     in  GameState { gmMineState = field',
-                    gmLambdas   = lambdas,
-                    gmScore     = score,
+                    gmLambdas   = lambdas',
+                    gmScore     = score',
                     gmFinished  = finished }
 
 processEnvironment :: GameState -> GameState
-processEnvironment state = state -- TODO: Falling rocks, opening lifts.
+processEnvironment state =
+    let finished = gmFinished state
+    in  if finished
+        then state
+        else state -- TODO: Falling rocks, opening lifts.
 
 processFinishConditions :: GameState -> GameState
 processFinishConditions state = state -- TODO: Check win and lose conditions.
@@ -63,8 +73,9 @@ getRobotPosition :: MineState -> Action -> Point -> Point
 getRobotPosition field action (x, y) =
     case action of
         AWait  -> (x, y)
-        ALeft  -> (x - 1, y) -- TODO: Check left side
-        ARight -> (x + 1, y)
+        AAbort -> (x, y)
+        ALeft  -> (x - 1, y) -- TODO: Check left side.
+        ARight -> (x + 1, y) -- TODO: Check right side.
 
 replaceCell :: MineState -> (Int, Int) -> Cell -> MineState
 replaceCell field (x, y) cell =
