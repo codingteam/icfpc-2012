@@ -1,5 +1,5 @@
 GHC=ghc --make -isrc/
-TESTS=src/parserTest src/handlerTest src/EmulatorTest
+TESTS=src/parserTest src/handlerTest src/EmulatorTest src/TestBruteforce
 
 all: tests
 
