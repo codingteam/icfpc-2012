@@ -25,16 +25,9 @@ processAction state action =
         score      = gmScore state
 
         field      = msField mineState
-        water      = msWater mineState
-        flooding   = msFlooding mineState
-        waterproof = msWaterproof mineState
-
 
         (field', robotPos') = moveRobot field action
-        mineState' = MineState { msField      = field',
-                                 msWater      = water,
-                                 msFlooding   = flooding,
-                                 msWaterproof = waterproof }
+        mineState' = mineState { msField      = field' }
 
         lambdaDelta = if hasObject field robotPos' Lambda then 1 else 0
         lambdas' = lambdas + lambdaDelta
@@ -163,10 +156,43 @@ mapi :: (a -> Int -> a) -> [a] -> [a]
 mapi fn xs = zipWith fn xs [0..]
 
 updateCell :: Field -> Point -> Cell
-updateCell field (x, y) =
-    case getObject field (x, y) of
-        ClosedLift | noLambdas field -> OpenLift
-        other -> other -- TODO: Falling rocks.
+updateCell field point =
+    case getObject field point of
+        ClosedLift | noLambdas field              -> OpenLift
+        Rock       | moveRockFromHere field point -> Empty
+        Empty      | moveRockHere field point     -> Rock
+        other                                     -> other
+    where moveRockFromHere field (x, y) =
+              -- Free fall:
+              hasObject field (x, y + 1) Empty ||
+              -- Slide from rock:
+              (hasObject field (x, y + 1) Rock &&
+               ((hasObject field (x + 1, y) Empty &&
+                 hasObject field (x + 1, y + 1) Empty) ||
+                 (hasObject field (x - 1, y) Empty &&
+                  hasObject field (x - 1, y + 1) Empty))) ||
+              -- Slide from lambda:
+              (hasObject field (x, y + 1) Lambda &&
+               (hasObject field (x + 1, y) Empty &&
+                hasObject field (x + 1, y + 1) Empty))
+          moveRockHere field (x, y) =
+              hasObject field (x, y) Empty &&
+              -- Free fall:
+              hasObject field (x, y - 1) Rock ||
+              -- Slide from a lamdba:
+              ((hasObject field (x - 1, y - 1) Rock &&
+                hasObject field (x - 1, y) Lambda &&
+                hasObject field (x, y - 1) Empty) ||
+               -- Slide from a rock (right side):
+               (hasObject field (x - 1, y - 1) Rock &&
+                hasObject field (x - 1, y) Rock &&
+                hasObject field (x, y - 1) Empty) ||
+               -- Slide from a rock (left side) only if right side blocked:
+               (hasObject field (x, y - 1) Empty &&
+                hasObject field (x + 1, y - 1) Rock &&
+                hasObject field (x + 1, y) Rock &&
+                (not (hasObject field (x + 2, y - 1) Empty) ||
+                 not (hasObject field (x + 2, y) Empty))))
 
 noLambdas :: Field -> Bool
 noLambdas field =
