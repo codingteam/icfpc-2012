@@ -12,7 +12,7 @@ data Cell = Empty | Earth | Wall | Rock | Lambda | Robot | ClosedLift | OpenLift
 data Action = ALeft | ARight | AUp | ADown | AWait | AAbort
      deriving (Eq, Show)
 
-data MineState = {
+data MineState = MineState {
     msField      :: [[Cell]],
     msWater      :: Int,
     msFlooding   :: Int,
