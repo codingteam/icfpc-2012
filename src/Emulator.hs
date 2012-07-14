@@ -21,7 +21,7 @@ processAction state action =
     let field = gmMineState state
 
         (field', robotPos') = moveRobot field action
-        lambdaDelta = getLambdas field robotPos'
+        lambdaDelta = if hasObject field robotPos' Lambda then 1 else 0
         scoreDelta  = lambdaDelta * lambdaScore - 1
 
         lambdas = gmLambdas state + lambdaDelta
@@ -47,8 +47,8 @@ moveRobot field action =
         field''   = replaceCell field' position' Robot
     in  (field'', position')
 
-getLambdas :: MineState -> Point -> Int
-getLambdas field (x, y) = if field !! y !! x == Lambda then 1 else 0
+hasObject :: MineState -> Point -> Cell -> Bool
+hasObject field (x, y) object = field !! y !! x == object
 
 findRobot :: MineState -> Point
 findRobot field =
