@@ -101,7 +101,10 @@ main = do
         [[Empty, Rock, Rock], [Robot, Empty, Empty]] 0 0 AWait
         [[Empty, Empty, Empty], [Robot, Rock, Rock]] 0 (-1) False
 
-    -- TODO: Double rock falling test.
+    -- Two rocks falling:
+    doTest "two rocks"
+        [[Robot, Rock], [Empty, Rock], [Empty, Empty]] 0 0 AWait
+        [[Robot, Rock], [Empty, Empty], [Empty, Rock]] 0 (-1) False
 
     -- Sliding rocks:
     doTest "slide rock from a lambda"
