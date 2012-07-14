@@ -14,11 +14,14 @@ lambdaLiftScore = 50
 
 emulate :: GameState -> Action -> GameState
 emulate state action =
-    let state'   = processAction state action
+    let actions  = gmActions state
+        state'   = processAction state action
         finished = gmFinished state'
-    in  if finished
-        then state'
-        else processFinishConditions state $ processEnvironment state'
+        finalState = if finished
+                     then state'
+                     else processFinishConditions state $ processEnvironment state'
+
+    in  finalState { gmActions = actions ++ [action] }
 
 processAction :: GameState -> Action -> GameState
 processAction state action =
