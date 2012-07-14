@@ -44,7 +44,15 @@ processEnvironment state =
     let finished = gmFinished state
     in  if finished
         then state
-        else state -- TODO: Falling rocks, opening lifts.
+        else let field = gmMineState state
+                 lambdas = gmLambdas state
+                 score = gmScore state
+
+                 field' = updateField field
+             in  GameState { gmMineState = field',
+                             gmLambdas   = lambdas,
+                             gmScore     = score,
+                             gmFinished  = finished }
 
 processFinishConditions :: GameState -> GameState
 processFinishConditions state = state -- TODO: Check win and lose conditions.
@@ -57,8 +65,18 @@ moveRobot field action =
         field''   = replaceCell field' position' Robot
     in  (field'', position')
 
+getObject :: MineState -> Point -> Cell
+getObject field (x, y) = field !! y !! x
+
 hasObject :: MineState -> Point -> Cell -> Bool
-hasObject field (x, y) object = field !! y !! x == object
+hasObject field point object = getObject field point == object
+
+updateField :: MineState -> MineState
+updateField field =
+    let width  = sizeX field
+        height = sizeY field
+    in  mapi (\row y -> mapi (\cell x ->
+                                  updateCell field (x, y)) row) field
 
 findRobot :: MineState -> Point
 findRobot field =
@@ -76,10 +94,25 @@ getRobotPosition field action (x, y) =
         AAbort -> (x, y)
         ALeft  -> (x - 1, y) -- TODO: Check left side.
         ARight -> (x + 1, y) -- TODO: Check right side.
+        -- TODO: Other actions.
 
-replaceCell :: MineState -> (Int, Int) -> Cell -> MineState
+replaceCell :: MineState -> Point -> Cell -> MineState
 replaceCell field (x, y) cell =
     mapi (\row y' -> mapi (\cell' x' ->
             if (x, y) == (x', y') then cell else cell') row) field
-    where mapi :: (a -> Int -> a) -> [a] -> [a]
-          mapi fn xs = zipWith fn xs [0..]
+
+mapi :: (a -> Int -> a) -> [a] -> [a]
+mapi fn xs = zipWith fn xs [0..]
+
+updateCell :: MineState -> Point -> Cell
+updateCell field (x, y) =
+    case getObject field (x, y) of
+        ClosedLift | noLambdas field -> OpenLift
+        other -> other -- TODO: Falling rocks.
+
+noLambdas :: MineState -> Bool
+noLambdas field =
+    let width  = sizeX field
+        height = sizeY field
+    in  all (\p -> getObject field p /= Lambda) [(x, y) | x <- [0..width - 1],
+                                                          y <- [1..height - 1]]
