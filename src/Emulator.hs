@@ -14,9 +14,11 @@ lambdaLiftScore = 50
 
 emulate :: GameState -> Action -> GameState
 emulate state action =
-    let state'  = processAction state action
-        state'' = processEnvironment state'
-    in  processFinishConditions state state''
+    let state'   = processAction state action
+        finished = gmFinished state'
+    in  if finished
+        then state'
+        else processFinishConditions state $ processEnvironment state'
 
 processAction :: GameState -> Action -> GameState
 processAction state action =
@@ -46,18 +48,9 @@ processAction state action =
 processEnvironment :: GameState -> GameState
 processEnvironment state =
     -- TODO: Process flooding.
-    let finished = gmFinished state
-    in  if finished
-        then state
-        else let mineState = gmMineState state
-                 lambdas = gmLambdas state
-                 score = gmScore state
-
-                 mineState' = updateMineState mineState
-             in  GameState { gmMineState = mineState',
-                             gmLambdas   = lambdas,
-                             gmScore     = score,
-                             gmFinished  = finished }
+    let mineState = gmMineState state
+        mineState' = updateMineState mineState
+    in  state { gmMineState = mineState' }
 
 processFinishConditions :: GameState -> GameState -> GameState
 processFinishConditions state state' =
@@ -79,7 +72,7 @@ processFinishConditions state state' =
             in if hasObject field  (x, y - 1) Empty &&
                   hasObject field' (x, y - 1) Rock
                   -- TODO: Check water level and waterproof.
-               then GameState { gmMineState = mineState,
+               then GameState { gmMineState = mineState',
                                 gmLambdas   = lambdas',
                                 gmScore     = score',
                                 gmFinished  = True }
