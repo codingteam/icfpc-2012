@@ -96,17 +96,56 @@ main = do
         [[Robot, Lambda, ClosedLift]] 0 0 ARight
         [[Empty, Robot, OpenLift]] 1 24 False
 
-    -- TODO: Falling rocks.
-    -- TODO: Sliding rocks from a lambdas.
-    -- TODO: Destroying rocks with collision.
-    -- TODO: Dying under the falling rock.
-    -- TODO: Not dying under the stable rock.
+    -- Falling rocks:
+    doTest "fall"
+        [[Empty, Rock, Rock], [Robot, Empty, Empty]] 0 0 AWait
+        [[Empty, Empty, Empty], [Robot, Rock, Rock]] 0 (-1) False
+
+    -- Sliding rocks:
+    doTest "slide rock from a lambda"
+        [[Robot, Rock, Empty], [Empty, Lambda, Empty]] 0 0 AWait
+        [[Robot, Empty, Empty], [Empty, Lambda, Rock]] 0 (-1) False
+
+    doTest "no slide from a lambda in left direction"
+        [[Robot, Empty, Rock], [Empty, Empty, Lambda]] 0 0 AWait
+        [[Robot, Empty, Rock], [Empty, Empty, Lambda]] 0 (-1) False
+
+    doTest "slide rock from a rock (left)"
+        [[Robot, Empty, Rock], [Empty, Empty, Rock]] 0 0 AWait
+        [[Robot, Empty, Empty], [Empty, Rock, Rock]] 0 (-1) False
+
+    doTest "slide rock from a rock (right)"
+        [[Robot, Rock, Empty], [Empty, Rock, Empty]] 0 0 AWait
+        [[Robot, Empty, Empty], [Empty, Rock, Rock]] 0 (-1) False
+
+    doTest "slide blocked by obstacle"
+        [[Robot, Rock, Wall], [Empty, Rock, Empty]] 0 0 AWait
+        [[Robot, Rock, Wall], [Empty, Rock, Empty]] 0 (-1) False
+
+    -- Destroying rocks with a collision:
+    doTest "rock collision"
+        [[Robot, Rock, Empty, Rock], [Empty, Rock, Empty, Rock]] 0 0 AWait
+        [[Robot, Empty, Empty, Empty], [Empty, Rock, Rock, Rock]] 0 (-1) False
+
+    -- Dying under a rock:
+    doTest "die"
+        [[Rock], [Empty], [Robot]] 0 0 AWait
+        [[Empty], [Rock], [Robot]] 0 (-1) True
+
+    -- Not dying under the stable rock:
+    doTest "alive"
+        [[Rock], [Robot]] 0 0 AWait
+        [[Rock], [Robot]] 0 (-1) False
 
     -- Aborting the game:
     doTest "abort"
         [[Robot]] 1 24 AAbort
         [[Robot]] 1 49 True
-    -- TODO: Aborting the game in the pre-death conditions.
+
+    -- Aborting the game in the pre-death conditions.
+    doTest "emergency abort"
+        [[Rock], [Empty], [Robot]] 1 0 AAbort
+        [[Empty], [Rock], [Robot]] 0 24 True
 
     -- Winning the game:
     doTest "win"
