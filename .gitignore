@@ -5,3 +5,4 @@
 *.exe
 src/parserTest
 src/EmulatorTest
+src/handlerTest

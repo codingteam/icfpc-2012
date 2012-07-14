@@ -14,6 +14,7 @@ count n var
   | otherwise =
     do
     putStrLn $ "Count: " ++ show n
+    atomically $ writeTVar var n
     threadDelay $ 500*1000
     count (n-1) var
 
