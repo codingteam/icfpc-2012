@@ -26,10 +26,9 @@ emulate state action =
 
 validate :: GameState -> Action -> Bool
 validate gameState action =
-    let field  = msField $ gmMineState gameState
-        robot  = findRobot field
-        (field', robot') = moveRobot field action
-    in  robot == robot' && field == field'
+    let field = msField $ gmMineState gameState
+        robot = findRobot field
+    in  action == AWait || isPassableForRobot field robot action
 
 processAction :: GameState -> Action -> GameState
 processAction state action =
