@@ -114,6 +114,8 @@ getRobotPosition field action (x, y) =
     case action of
         AWait  -> (x, y)
         AAbort -> (x, y)
+        AUp    -> (x, y - 1) -- TODO: Check top side.
+        ADown  -> (x, y + 1) -- TODO: Check bottom side.
         ALeft  -> (x - 1, y) -- TODO: Check left side.
         ARight -> (x + 1, y) -- TODO: Check right side.
         other  -> (x, y) -- TODO: Other actions.
