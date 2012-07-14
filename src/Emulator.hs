@@ -89,10 +89,18 @@ moveRobot :: Field -> Action -> (Field, Point)
 moveRobot field action =
     let position  = findRobot field
         position' = getRobotPosition field action position
-        field'    = replaceCell field position Empty
-        field''   = replaceCell field' position' Robot
-        -- TODO: Moving rocks.
-    in  (field'', position')
+        field'    = if hasObject field position' Rock
+                    then moveRock field position' action
+                    else field
+        field''   = replaceCell field' position Empty
+        field'''  = replaceCell field'' position' Robot
+    in  (field''', position')
+
+moveRock field (x, y) action =
+    let field' = case action of
+                     ALeft  -> replaceCell field (x - 1, y) Rock
+                     ARight -> replaceCell field (x + 1, y) Rock
+    in  replaceCell field' (x, y) Empty
 
 getObject :: Field -> Point -> Cell
 getObject field (x, y) = field !! y !! x
@@ -130,10 +138,17 @@ findRobot field =
     where hasRobot :: [Cell] -> Bool
           hasRobot cells = any (\c -> c == Robot) cells
 
-isPassableForRobot :: Field -> Point -> Bool
-isPassableForRobot field point =
+isPassableForRobot :: Field -> Point -> Action -> Bool
+isPassableForRobot field point action =
     any (\o -> hasObject field point o) [Empty, Earth, Lambda, OpenLift]
-    -- TODO: Check for moving rocks.
+    || (any (\a -> action == a) [ALeft, ARight]
+        && hasObject field point Rock && rockMovable field point action)
+    where rockMovable :: Field -> Point -> Action -> Bool
+          rockMovable field (x, y) action =
+              let rockPosition = case action of
+                                     ALeft  -> (x - 1, y)
+                                     ARight -> (x + 1, y)
+              in  hasObject field rockPosition Empty
 
 getRobotPosition :: Field -> Action -> Point -> Point
 getRobotPosition field action (x, y) =
@@ -143,7 +158,7 @@ getRobotPosition field action (x, y) =
                                   ADown  -> (x, y + 1)
                                   ALeft  -> (x - 1, y)
                                   ARight -> (x + 1, y)
-    in  if isPassableForRobot field position
+    in  if isPassableForRobot field position action
         then position
         else (x, y)
 
