@@ -31,9 +31,10 @@ bruteforce steps gameState var
     let handleAction action =
           let nextGameState = emulate gameState action
           in if gmScore gameState < gmScore nextGameState
-             then do atomically $ writeTVar var nextGameState
+             then do putStrLn $ "Better solution: " ++ show (gmScore nextGameState) ++ " > " ++ show (gmScore gameState)
+                     output nextGameState
+                     atomically $ writeTVar var nextGameState
                      bruteforce (steps - 1) nextGameState var
              else bruteforce (steps - 1) nextGameState var
-    in do output gameState      -- debug output
-          sequence_ $ map handleAction [ALeft, ARight, AUp, ADown, AWait, AAbort]
+    in do sequence_ $ map handleAction [ALeft, ARight, AUp, ADown, AWait, AAbort]
 
