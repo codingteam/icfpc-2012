@@ -28,7 +28,8 @@ validate :: GameState -> Action -> Bool
 validate gameState action =
     let field = msField $ gmMineState gameState
         robot = findRobot field
-    in  action == AWait || isPassableForRobot field robot action
+    in  action == AWait
+        || getRobotPosition field action robot /= robot
 
 processAction :: GameState -> Action -> GameState
 processAction state action =
