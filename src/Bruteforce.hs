@@ -35,5 +35,4 @@ bruteforce steps gameState var
                   then do atomically $ writeTVar var nextGameState
                           bruteforce (steps - 1) nextGameState var
                   else bruteforce (steps - 1) nextGameState var
-    in do sequence_ $ map handleAction [ALeft, ARight, AUp, ADown, AWait, AAbort]
-
+    in sequence_ $ map handleAction $ filter (validate gameState) [ALeft, ARight, AUp, ADown, AWait, AAbort]
