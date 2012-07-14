@@ -12,7 +12,12 @@ data Cell = Empty | Earth | Wall | Rock | Lambda | Robot | ClosedLift | OpenLift
 data Action = ALeft | ARight | AUp | ADown | AWait | AAbort
      deriving (Eq, Show)
 
-type MineState = [[Cell]]
+type MineState = {
+    msField      :: [[Cell]],
+    msWater      :: Int,
+    msFlooding   :: Int,
+    msWaterproof :: Int
+} deriving (Eq, Show)
 
 data GameState = GameState {
     gmLambdas   :: Int,
