@@ -33,6 +33,6 @@ readInput = do (description, metadata) <- fmap (break null . lines) getContents
                let mineState = MineState {msField = map (map charToCell) $ padLines description,
                                           msWater = 0,
                                           msFlooding = 0,
-                                          msWaterproof = 0}
+                                          msWaterproof = 10}
                return (foldl parseParameter mineState metadata)
                
