@@ -25,14 +25,16 @@ doTest n field lambdas score action field' lambdas' score' finished =
                                                   msWaterproof = defaultWaterproof },
                         gmLambdas   = lambdas,
                         gmScore     = score,
-                        gmFinished  = False }, action)
+                        gmFinished  = False,
+                        gmActions   = [] }, action)
            GameState { gmMineState = MineState { msField      = field',
                                                  msWater      = defaultWater,
                                                  msFlooding   = defaultFlooding,
                                                  msWaterproof = defaultWaterproof },
                        gmLambdas   = lambdas',
                        gmScore     = score',
-                       gmFinished  = finished }
+                       gmFinished  = finished,
+                       gmActions   = [action] }
 
 main :: IO()
 main = do

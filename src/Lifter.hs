@@ -27,7 +27,8 @@ data GameState = GameState {
     gmLambdas   :: Int,
     gmScore     :: Int,
     gmMineState :: MineState,
-    gmFinished  :: Bool
+    gmFinished  :: Bool,
+    gmActions   :: [Action]
 } deriving (Eq, Show)
 
 defaultWater :: Int
