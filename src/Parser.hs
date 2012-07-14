@@ -1,6 +1,7 @@
 
 module Parser where
 
+import Data.Char (isSpace)
 import Lifter
 
 charToCell :: Char -> Cell
@@ -13,11 +14,25 @@ charToCell ch = case ch of ' ' -> Empty
                            'L' -> ClosedLift
                            other -> error ("Unknown character: " ++ [other])
 
-padLine size line = line ++ replicate n ' '
+extendLine size line = line ++ replicate n ' '
   where n = max 0 (length line - size)
 
+padLines lines = map (extendLine maxLength) lines
+  where maxLength = maximum $ map length lines
+
+parseParameter mineState parameter =
+  case name of
+    "Water"      -> mineState {msWater = read rest}
+    "Flooding"   -> mineState {msFlooding = read rest}
+    "Waterproof" -> mineState {msWaterproof = read rest}
+    _            -> mineState
+  where (name, rest) = break isSpace parameter
+
 readInput :: IO MineState
-readInput = do inputLines <- fmap lines getContents
-               let maxLength = maximum $ map length inputLines
-               let paddedLines = map (padLine maxLength) inputLines
-               return $ map (map charToCell) paddedLines
+readInput = do (description, metadata) <- fmap (break null . lines) getContents
+               let mineState = MineState {msField = map (map charToCell) $ padLines description,
+                                          msWater = 0,
+                                          msFlooding = 0,
+                                          msWaterproof = 0}
+               return (foldl parseParameter mineState metadata)
+               
