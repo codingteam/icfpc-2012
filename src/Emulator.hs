@@ -83,15 +83,18 @@ moveRobot field action =
         position' = getRobotPosition field action position
         field'    = replaceCell field position Empty
         field''   = replaceCell field' position' Robot
+        -- TODO: Moving rocks.
     in  (field'', position')
 
 getObject :: MineState -> Point -> Cell
 getObject field (x, y) = field !! y !! x
 
+isOnField :: MineState -> Point -> Bool
+isOnField field (x, y) = x >= 0 && y >= 0 && x < sizeX field && y < sizeY field
+
 hasObject :: MineState -> Point -> Cell -> Bool
-hasObject field (x, y) object =
-    x >= 0 && y >= 0 && x < sizeX field && y < sizeY field &&
-    getObject field (x, y) == object
+hasObject field point object =
+    isOnField field point && getObject field point == object
 
 updateField :: MineState -> MineState
 updateField field =
@@ -109,16 +112,22 @@ findRobot field =
     where hasRobot :: [Cell] -> Bool
           hasRobot cells = any (\c -> c == Robot) cells
 
+isPassableForRobot :: MineState -> Point -> Bool
+isPassableForRobot field point =
+    any (\o -> hasObject field point o) [Empty, Earth, Lambda, OpenLift]
+    -- TODO: Check for moving rocks.
+
 getRobotPosition :: MineState -> Action -> Point -> Point
 getRobotPosition field action (x, y) =
-    case action of
-        AWait  -> (x, y)
-        AAbort -> (x, y)
-        AUp    -> (x, y - 1) -- TODO: Check top side.
-        ADown  -> (x, y + 1) -- TODO: Check bottom side.
-        ALeft  -> (x - 1, y) -- TODO: Check left side.
-        ARight -> (x + 1, y) -- TODO: Check right side.
-        -- TODO: Moving rocks.
+    let position = case action of AWait  -> (x, y)
+                                  AAbort -> (x, y)
+                                  AUp    -> (x, y - 1)
+                                  ADown  -> (x, y + 1)
+                                  ALeft  -> (x - 1, y)
+                                  ARight -> (x + 1, y)
+    in  if isPassableForRobot field position
+        then position
+        else (x, y)
 
 replaceCell :: MineState -> Point -> Cell -> MineState
 replaceCell field (x, y) cell =
