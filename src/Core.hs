@@ -1,4 +1,4 @@
-module Lifter (
+module Core (
     Action   (..),
     Cell     (..),
     Field,

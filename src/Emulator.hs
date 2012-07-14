@@ -4,7 +4,7 @@ module Emulator (
 
 import Data.List (findIndex)
 import Data.Maybe (fromJust)
-import Lifter
+import Core
 
 type Point = (Int, Int)
 

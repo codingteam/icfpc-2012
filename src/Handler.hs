@@ -6,7 +6,7 @@ import Control.Concurrent.STM
 import System.Posix.Signals
 import System.Exit
 
-import Lifter
+import Core
 
 type ExitLock = TMVar ExitCode
 

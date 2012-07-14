@@ -9,6 +9,6 @@ src/%: src/%.hs
 	$(GHC) $<
 
 clean:
-	rm -f $(TESTS)
+	rm -f $(TESTS) src/lifter
 	find . -name *.hi -delete
 	find . -name *.o -delete

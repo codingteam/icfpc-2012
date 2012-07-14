@@ -1,5 +1,5 @@
 
-import Lifter
+import Core
 import Parser
 import Handler
 import Bruteforce

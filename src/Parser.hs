@@ -2,7 +2,7 @@
 module Parser where
 
 import Data.Char (isSpace)
-import Lifter
+import Core
 
 charToCell :: Char -> Cell
 charToCell ch = case ch of ' ' -> Empty

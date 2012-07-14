@@ -3,7 +3,7 @@ module Main (
 ) where
 
 import Emulator (emulate)
-import Lifter
+import Core
 
 type TestCase = (GameState, Action)
 

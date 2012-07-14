@@ -4,7 +4,7 @@ module Bruteforce (
 
 import Control.Concurrent
 import Control.Concurrent.STM
-import Lifter
+import Core
 import Emulator
 
 actionToChar :: Action -> Char
