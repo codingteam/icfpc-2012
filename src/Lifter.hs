@@ -26,9 +26,9 @@ data GameState = GameState {
     gmFinished  :: Bool
 } deriving (Eq, Show)
 
-sizeX :: MineState -> Int
+sizeX :: [[Cell]] -> Int
 sizeX field = let row = field !! 0
               in  length row
 
-sizeY :: MineState -> Int
+sizeY :: [[Cell]] -> Int
 sizeY field = length field
