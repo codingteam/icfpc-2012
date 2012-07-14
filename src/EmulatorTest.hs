@@ -44,8 +44,26 @@ main = do
         [[Robot, Empty]] 0 0 ARight
         [[Empty, Robot]] 0 (-1) False
 
-    -- TODO: Trying to move into an obstacle.
-    -- TODO: Trying to move into map egde.
+    -- Waiting:
+    doTest "wait"
+        [[Robot, Empty]] 0 0 AWait
+        [[Robot, Empty]] 0 (-1) False
+
+    -- Blocked movement:
+    doTest "blocked by wall"
+        [[Robot, Wall]] 0 0 ARight
+        [[Robot, Wall]] 0 (-1) False
+    doTest "blocked by rock"
+        [[Robot, Rock]] 0 0 ARight
+        [[Robot, Rock]] 0 (-1) False
+    doTest "blocked by rock blocked by lambda"
+        [[Robot, Rock, Lambda]] 0 0 ARight
+        [[Robot, Rock, Lambda]] 0 (-1) False
+
+    -- Blocked by map edge:
+    doTest "map edge"
+        [[Empty, Robot]] 0 0 ARight
+        [[Empty, Robot]] 0 (-1) False
 
     -- Digging:
     doTest "dig"
