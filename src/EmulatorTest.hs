@@ -81,3 +81,5 @@ main = do
     doTest "win"
         [[Robot, OpenLift]] 1 0 ARight
         [[Empty, Robot]] 1 49 True
+
+    -- TODO: Water handling.
