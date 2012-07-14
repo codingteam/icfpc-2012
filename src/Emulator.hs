@@ -43,7 +43,8 @@ processAction state action =
         score' = score + scoreDelta
 
         finished = action == AAbort
-    in  GameState { gmMineState = mineState',
+    in  GameState { gmActions   = [],
+                    gmMineState = mineState',
                     gmLambdas   = lambdas',
                     gmScore     = score',
                     gmFinished  = finished }
@@ -67,7 +68,8 @@ processFinishConditions state state' =
 
         robotPosition' = findRobot field'
     in if hasObject field robotPosition' OpenLift
-       then GameState { gmMineState = mineState',
+       then GameState { gmActions   = [],
+                        gmMineState = mineState',
                         gmLambdas   = lambdas',
                         gmScore     = score' + lambdas' * lambdaLiftScore,
                         gmFinished  = True }
@@ -75,7 +77,8 @@ processFinishConditions state state' =
             in if hasObject field  (x, y - 1) Empty &&
                   hasObject field' (x, y - 1) Rock
                   -- TODO: Check water level and waterproof.
-               then GameState { gmMineState = mineState',
+               then GameState { gmActions   = [],
+                                gmMineState = mineState',
                                 gmLambdas   = lambdas',
                                 gmScore     = score',
                                 gmFinished  = True }
