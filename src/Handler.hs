@@ -16,12 +16,10 @@ handleSignals def fn output = do
   mvar <- atomically $ newEmptyTMVar
   installHandler sigINT (Catch $ handler mvar var output) Nothing
   forkIO (fn var >> atomically (putTMVar mvar ExitSuccess))
-  exitOnSignal mvar
+  exitCode <- atomically $ takeTMVar mvar
   result <- atomically $ readTVar var
   output result
-
-exitOnSignal :: ExitLock -> IO ()
-exitOnSignal var = atomically (takeTMVar var) >>= exitWith
+  exitWith exitCode
 
 handler :: ExitLock -> TVar a -> (a -> IO ()) -> IO ()
 handler mvar var output = do
