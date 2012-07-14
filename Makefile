@@ -1,7 +1,7 @@
 GHC=ghc --make -isrc/
 TESTS=src/parserTest src/handlerTest src/EmulatorTest src/TestBruteforce
 
-all: tests
+all: tests src/lifter
 
 tests: $(TESTS)
 
