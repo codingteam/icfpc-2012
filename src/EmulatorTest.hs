@@ -36,3 +36,5 @@ main = do
              [[Empty, Robot, OpenLift]] 1 24 False
     doTest 3 [[Robot]] 1 24 AAbort
              [[Robot]] 1 49 True
+    doTest 4 [[Robot, OpenLift]] 1 0 ARight
+             [[Empty, Robot]] 1 49 True
