@@ -20,11 +20,21 @@ emulate state action =
 
 processAction :: GameState -> Action -> GameState
 processAction state action =
-    let field = gmMineState state
-        lambdas = gmLambdas state
-        score = gmScore state
+    let mineState  = gmMineState state
+        lambdas    = gmLambdas state
+        score      = gmScore state
+
+        field      = msField mineState
+        water      = msWater mineState
+        flooding   = msFlooding mineState
+        waterproof = msWaterproof mineState
+
 
         (field', robotPos') = moveRobot field action
+        mineState' = MineState { msField      = field',
+                                 msWater      = water,
+                                 msFlooding   = flooding,
+                                 msWaterproof = waterproof }
 
         lambdaDelta = if hasObject field robotPos' Lambda then 1 else 0
         lambdas' = lambdas + lambdaDelta
@@ -35,49 +45,54 @@ processAction state action =
         score' = score + scoreDelta
 
         finished = action == AAbort
-    in  GameState { gmMineState = field',
+    in  GameState { gmMineState = mineState',
                     gmLambdas   = lambdas',
                     gmScore     = score',
                     gmFinished  = finished }
 
 processEnvironment :: GameState -> GameState
 processEnvironment state =
+    -- TODO: Process flooding.
     let finished = gmFinished state
     in  if finished
         then state
-        else let field = gmMineState state
+        else let mineState = gmMineState state
                  lambdas = gmLambdas state
                  score = gmScore state
 
-                 field' = updateField field
-             in  GameState { gmMineState = field',
+                 mineState' = updateMineState mineState
+             in  GameState { gmMineState = mineState',
                              gmLambdas   = lambdas,
                              gmScore     = score,
                              gmFinished  = finished }
 
 processFinishConditions :: GameState -> GameState -> GameState
 processFinishConditions state state' =
-    let field    = gmMineState state
-        field'   = gmMineState state'
-        lambdas' = gmLambdas state'
-        score'   = gmScore state'
+    let mineState  = gmMineState state
+        mineState' = gmMineState state'
+        lambdas'   = gmLambdas state'
+        score'     = gmScore state'
+
+        field      = msField mineState
+        field'     = msField mineState'
 
         robotPosition' = findRobot field'
     in if hasObject field robotPosition' OpenLift
-       then GameState { gmMineState = field',
+       then GameState { gmMineState = mineState',
                         gmLambdas   = lambdas',
                         gmScore     = score' + lambdas' * lambdaLiftScore,
                         gmFinished  = True }
        else let (x, y) = robotPosition'
             in if hasObject field  (x, y - 1) Empty &&
                   hasObject field' (x, y - 1) Rock
-               then GameState { gmMineState = field',
+                  -- TODO: Check water level and waterproof.
+               then GameState { gmMineState = mineState,
                                 gmLambdas   = lambdas',
                                 gmScore     = score',
                                 gmFinished  = True }
                else state'
 
-moveRobot :: MineState -> Action -> (MineState, Point)
+moveRobot :: Field -> Action -> (Field, Point)
 moveRobot field action =
     let position  = findRobot field
         position' = getRobotPosition field action position
@@ -86,24 +101,34 @@ moveRobot field action =
         -- TODO: Moving rocks.
     in  (field'', position')
 
-getObject :: MineState -> Point -> Cell
+getObject :: Field -> Point -> Cell
 getObject field (x, y) = field !! y !! x
 
-isOnField :: MineState -> Point -> Bool
+isOnField :: Field -> Point -> Bool
 isOnField field (x, y) = x >= 0 && y >= 0 && x < sizeX field && y < sizeY field
 
-hasObject :: MineState -> Point -> Cell -> Bool
+hasObject :: Field -> Point -> Cell -> Bool
 hasObject field point object =
     isOnField field point && getObject field point == object
 
-updateField :: MineState -> MineState
-updateField field =
-    let width  = sizeX field
-        height = sizeY field
-    in  mapi (\row y -> mapi (\cell x ->
-                                  updateCell field (x, y)) row) field
+updateMineState :: MineState -> MineState
+updateMineState mineState =
+    let field      = msField mineState
+        water      = msWater mineState
+        flooding   = msFlooding mineState
+        waterproof = msWaterproof mineState
 
-findRobot :: MineState -> Point
+        width  = sizeX field
+        height = sizeY field
+
+        field' = mapi (\row y -> mapi (\cell x -> updateCell field (x, y)) row) field
+        -- TODO: Calculate water level and waterproof.
+    in  MineState { msField      = field',
+                    msWater      = water,
+                    msFlooding   = flooding,
+                    msWaterproof = waterproof }
+
+findRobot :: Field -> Point
 findRobot field =
     let rowIndex = fromJust $ findIndex hasRobot field
         row = (field !! rowIndex)
@@ -112,12 +137,12 @@ findRobot field =
     where hasRobot :: [Cell] -> Bool
           hasRobot cells = any (\c -> c == Robot) cells
 
-isPassableForRobot :: MineState -> Point -> Bool
+isPassableForRobot :: Field -> Point -> Bool
 isPassableForRobot field point =
     any (\o -> hasObject field point o) [Empty, Earth, Lambda, OpenLift]
     -- TODO: Check for moving rocks.
 
-getRobotPosition :: MineState -> Action -> Point -> Point
+getRobotPosition :: Field -> Action -> Point -> Point
 getRobotPosition field action (x, y) =
     let position = case action of AWait  -> (x, y)
                                   AAbort -> (x, y)
@@ -129,7 +154,7 @@ getRobotPosition field action (x, y) =
         then position
         else (x, y)
 
-replaceCell :: MineState -> Point -> Cell -> MineState
+replaceCell :: Field -> Point -> Cell -> Field
 replaceCell field (x, y) cell =
     mapi (\row y' -> mapi (\cell' x' ->
             if (x, y) == (x', y') then cell else cell') row) field
@@ -137,13 +162,13 @@ replaceCell field (x, y) cell =
 mapi :: (a -> Int -> a) -> [a] -> [a]
 mapi fn xs = zipWith fn xs [0..]
 
-updateCell :: MineState -> Point -> Cell
+updateCell :: Field -> Point -> Cell
 updateCell field (x, y) =
     case getObject field (x, y) of
         ClosedLift | noLambdas field -> OpenLift
         other -> other -- TODO: Falling rocks.
 
-noLambdas :: MineState -> Bool
+noLambdas :: Field -> Bool
 noLambdas field =
     let width  = sizeX field
         height = sizeY field

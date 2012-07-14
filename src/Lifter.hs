@@ -1,8 +1,10 @@
 module Lifter (
     Action   (..),
     Cell     (..),
+    Field,
     GameState(..),
-    MineState,
+    MineState(..),
+    defaultWater, defaultFlooding, defaultWaterproof,
     sizeX, sizeY
 ) where
 
@@ -12,8 +14,10 @@ data Cell = Empty | Earth | Wall | Rock | Lambda | Robot | ClosedLift | OpenLift
 data Action = ALeft | ARight | AUp | ADown | AWait | AAbort
      deriving (Eq, Show)
 
-type MineState = {
-    msField      :: [[Cell]],
+type Field = [[Cell]]
+
+data MineState = MineState {
+    msField      :: Field,
     msWater      :: Int,
     msFlooding   :: Int,
     msWaterproof :: Int
@@ -26,9 +30,18 @@ data GameState = GameState {
     gmFinished  :: Bool
 } deriving (Eq, Show)
 
-sizeX :: MineState -> Int
+defaultWater :: Int
+defaultWater = 0
+
+defaultFlooding :: Int
+defaultFlooding = 0
+
+defaultWaterproof :: Int
+defaultWaterproof = 10
+
+sizeX :: Field -> Int
 sizeX field = let row = field !! 0
               in  length row
 
-sizeY :: MineState -> Int
+sizeY :: Field -> Int
 sizeY field = length field

@@ -16,14 +16,20 @@ test n (state, action) expected =
                 putStrLn $ " Real:     " ++ (show result)
                 putStrLn $ " Expected: " ++ (show expected)
 
-doTest :: Show a => a -> MineState -> Int -> Int -> Action
-       -> MineState -> Int -> Int -> Bool -> IO()
+doTest :: Show a => a -> Field -> Int -> Int -> Action
+       -> Field -> Int -> Int -> Bool -> IO()
 doTest n field lambdas score action field' lambdas' score' finished =
-    test n (GameState { gmMineState = field,
+    test n (GameState { gmMineState = MineState { msField      = field,
+                                                  msWater      = defaultWater,
+                                                  msFlooding   = defaultFlooding,
+                                                  msWaterproof = defaultWaterproof },
                         gmLambdas   = lambdas,
                         gmScore     = score,
                         gmFinished  = False }, action)
-           GameState { gmMineState = field',
+           GameState { gmMineState = MineState { msField      = field',
+                                                 msWater      = defaultWater,
+                                                 msFlooding   = defaultFlooding,
+                                                 msWaterproof = defaultWaterproof },
                        gmLambdas   = lambdas',
                        gmScore     = score',
                        gmFinished  = finished }
