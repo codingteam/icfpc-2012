@@ -2,4 +2,6 @@
 *.o
 .*.swp
 *.swp
+*.exe
 src/parserTest
+src/EmulatorTest
