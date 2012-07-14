@@ -116,7 +116,7 @@ getRobotPosition field action (x, y) =
         AAbort -> (x, y)
         ALeft  -> (x - 1, y) -- TODO: Check left side.
         ARight -> (x + 1, y) -- TODO: Check right side.
-        -- TODO: Other actions.
+        other  -> (x, y) -- TODO: Other actions.
 
 replaceCell :: MineState -> Point -> Cell -> MineState
 replaceCell field (x, y) cell =
