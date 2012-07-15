@@ -106,7 +106,8 @@ processFinishConditions state state' =
                      gsFinished  = True }
        else let (x, y) = robotPosition'
             in if (hasObject field (x, y - 1) Empty
-                   && hasObject field' (x, y - 1) Rock)
+                   && (hasObject field' (x, y - 1) Rock
+                       || hasObject field' (x, y - 1) Lambda)) -- Lambda there is a result of horock falling.
                   || (currentWaterproof' <= 0)
                then state' { gsFinished  = True }
                else state'
@@ -268,6 +269,7 @@ updateCell :: Field -> (Field, Bool) -> Point -> Field
 updateCell field (field', mustGrowBeard) (x, y) =
     case getObject field (x, y) of
         ClosedLift | noLambdas     -> openLift
+        Horock     | mustMoveRock  -> moveHorock ()
         Rock       | mustMoveRock  -> moveRock ()
         Beard      | mustGrowBeard -> growBeard
         _                          -> field'
@@ -275,27 +277,38 @@ updateCell field (field', mustGrowBeard) (x, y) =
           noLambdas =
               let width  = sizeX field
                   height = sizeY field
-              in  all (\p -> getObject field p /= Lambda) [(x, y) | x <- [0..width - 1],
-                                                                    y <- [0..height - 1]]
+              in  all (\p -> let cell = getObject field p
+                             in  cell /= Lambda && cell /= Horock) [(x, y) | x <- [0..width - 1],
+                                                                             y <- [0..height - 1]]
 
           openLift = replaceCell field' (x, y) OpenLift
 
-          -- Rocks:
-          mustMoveRock = canFall || canSlide
-          canFall  = hasObject field (x, y + 1) Empty
-          canSlide = canSlideLeft || canSlideRight
-          canSlideLeft = (hasObject field (x, y + 1) Rock) &&
-                         (hasObject field (x - 1, y) Empty && hasObject field (x - 1, y + 1) Empty)
-          canSlideRight = (hasObject field (x, y + 1) Rock || hasObject field (x, y + 1) Lambda) &&
-                         (hasObject field (x + 1, y) Empty && hasObject field (x + 1, y + 1) Empty)
+          -- Rocks and horocks:
+          mustMoveRock  = canFall || canSlide
+          canFall       = hasObject field (x, y + 1) Empty
+          canSlide      = canSlideLeft || canSlideRight
+          canSlideLeft  = (hasObject field (x, y + 1) Rock || hasObject field (x, y + 1) Horock) &&
+                          (hasObject field (x - 1, y) Empty && hasObject field (x - 1, y + 1) Empty)
+          canSlideRight = (hasObject field (x, y + 1) Rock || hasObject field (x, y + 1) Lambda
+                           || hasObject field (x, y + 1) Horock) &&
+                          (hasObject field (x + 1, y) Empty && hasObject field (x + 1, y + 1) Empty)
 
-          moveRock () | canFall       = fall
-          moveRock () | canSlideLeft  = slideLeft
-          moveRock () | canSlideRight = slideRight
+          moveRock () | canFall       = fst fall
+          moveRock () | canSlideLeft  = fst slideLeft
+          moveRock () | canSlideRight = fst slideRight
 
-          fall       = moveCell field' (x, y) (x,     y + 1)
-          slideLeft  = moveCell field' (x, y) (x - 1, y + 1)
-          slideRight = moveCell field' (x, y) (x + 1, y + 1)
+          moveHorock () | canFall       = applyHorock fall
+          moveHorock () | canSlideLeft  = applyHorock slideLeft
+          moveHorock () | canSlideRight = applyHorock slideRight
+
+          fall       = (moveCell field' (x, y) (x,     y + 1), (x,     y + 1))
+          slideLeft  = (moveCell field' (x, y) (x - 1, y + 1), (x - 1, y + 1))
+          slideRight = (moveCell field' (x, y) (x + 1, y + 1), (x + 1, y + 1))
+
+          applyHorock (f, (x', y')) =
+              if not $ hasObject f (x', y' + 1) Empty
+              then replaceCell f (x', y') Lambda
+              else f
 
           -- Beards:
           growBeard  = let coords = [(x', y') | x' <- [x - 1..x + 1], y' <- [y - 1..y + 1]]
