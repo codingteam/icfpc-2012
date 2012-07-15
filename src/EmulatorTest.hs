@@ -37,9 +37,8 @@ doTest n field lambdas score action field' lambdas' score' finished =
                         gsLambdas   = lambdas,
                         gsScore     = score,
                         gsFinished  = False,
-                        gsTurns     = 1,
                         gsActions   = [] }, action)
-           GameState { gsMineState = mineState { msField = field' },
+           gameState { gsMineState = mineState { msField = field' },
                        gsLambdas   = lambdas',
                        gsScore     = score',
                        gsFinished  = finished,
@@ -169,3 +168,38 @@ main = do
     doTest "win"
         [[Robot, OpenLift]] 1 0 ARight
         [[Empty, Robot]] 1 49 True
+
+    -- Water handling:
+    test "flooding"
+        (gameState { gsMineState = mineState { msField    = [[Robot], [Empty]],
+                                               msFlooding = 2,
+                                               msWater    = 0 },
+                     gsTurns     = 1 }, AWait)
+        gameState { gsMineState = mineState { msField    = [[Robot], [Empty]],
+                                              msFlooding = 2,
+                                              msWater    = 1 },
+                    gsTurns     = 2,
+                    gsActions   = [AWait] }
+
+    -- Decrementing waterproof:
+    test "waterproof"
+        (gameState { gsMineState = mineState { msField      = [[Robot]],
+                                               msWater      = 1,
+                                               msWaterproof = 2 } }, AWait)
+        gameState { gsMineState = mineState { msField      = [[Robot]],
+                                              msWater      = 1,
+                                              msWaterproof = 1 },
+                    gsTurns     = 1,
+                    gsActions   = [AWait] }
+
+    -- Drawning:
+    test "drawn"
+        (gameState { gsMineState = mineState { msField      = [[Robot]],
+                                               msWater      = 1,
+                                               msWaterproof = 0 } }, AWait)
+        gameState { gsMineState = mineState { msField      = [[Robot]],
+                                              msWater      = 1,
+                                              msWaterproof = 1 },
+                    gsFinished  = True,
+                    gsTurns     = 1,
+                    gsActions   = [AWait] }
