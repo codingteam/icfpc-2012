@@ -28,10 +28,21 @@ emulate gameState action =
 
 validate :: GameState -> Action -> Bool
 validate gameState action =
-    let field = msField $ gsMineState gameState
+    let mineState = gsMineState gameState
+
+        field  = msField mineState
+        razors = msRazors mineState
+
         robot = findRobot field
-    in  action == AWait
-        || (fst $ getRobotPosition field action robot) /= robot
+
+        wait       = action == AWait
+        robotMoved = (fst $ getRobotPosition field action robot) /= robot
+        useRazor   = action == ARazor && razors > 0 && haveBeards
+        haveBeards =
+            let (x, y) = robot
+                coords = [(x', y') | x' <- [x - 1..x + 1], y' <- [y - 1..y + 1]]
+            in  any (\p -> hasObject field p Beard) coords
+    in  wait || robotMoved || useRazor
 
 processWaterproof :: GameState -> GameState
 processWaterproof gameState =
