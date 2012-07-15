@@ -26,8 +26,6 @@ actionToChar action =
 output :: GameState -> IO ()
 output gameState =
   do putStr $ map actionToChar $ gsActions gameState
-     putStr " "
-     putStrLn $ show $ gsScore gameState
 
 abortGame :: GameState -> GameState
 abortGame state =
