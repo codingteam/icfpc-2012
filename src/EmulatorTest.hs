@@ -234,7 +234,10 @@ main = do
                     gsScore     = -1,
                     gsActions   = [AWait] }
 
-    -- TODO: Trampoline test.
+    -- Trampoline test:
+    doTest "trampoline test"
+        [[Robot, Trampoline('A', '1'), Target '1']] 0 0 ARight
+        [[Empty, Empty, Robot]] 0 (-1) False
 
     -- Beard growth test:
     test "beard growth"
