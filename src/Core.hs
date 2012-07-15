@@ -28,6 +28,7 @@ data GameState = GameState {
     gsScore     :: Int,
     gsMineState :: MineState,
     gsFinished  :: Bool,
+    gsTurns     :: Int,
     gsActions   :: [Action]
 } deriving (Eq, Show)
 

@@ -26,6 +26,7 @@ doTest n field lambdas score action field' lambdas' score' finished =
                         gsLambdas   = lambdas,
                         gsScore     = score,
                         gsFinished  = False,
+                        gsTurns     = 1,
                         gsActions   = [] }, action)
            GameState { gsMineState = MineState { msField      = field',
                                                  msWater      = defaultWater,
@@ -34,6 +35,7 @@ doTest n field lambdas score action field' lambdas' score' finished =
                        gsLambdas   = lambdas',
                        gsScore     = score',
                        gsFinished  = finished,
+                       gsTurns     = 1,
                        gsActions   = [action] }
 
 main :: IO()
@@ -158,5 +160,3 @@ main = do
     doTest "win"
         [[Robot, OpenLift]] 1 0 ARight
         [[Empty, Robot]] 1 49 True
-
-    -- TODO: Water handling.

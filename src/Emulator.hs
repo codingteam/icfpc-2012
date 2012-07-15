@@ -32,10 +32,10 @@ validate gameState action =
         || getRobotPosition field action robot /= robot
 
 processAction :: GameState -> Action -> GameState
-processAction state action =
-    let mineState  = gsMineState state
-        lambdas    = gsLambdas state
-        score      = gsScore state
+processAction gameState action =
+    let mineState  = gsMineState gameState
+        lambdas    = gsLambdas gameState
+        score      = gsScore gameState
 
         field      = msField mineState
 
@@ -51,8 +51,7 @@ processAction state action =
         score' = score + scoreDelta
 
         finished = action == AAbort
-    in  GameState { gsActions   = [],
-                    gsMineState = mineState',
+    in  gameState { gsMineState = mineState',
                     gsLambdas   = lambdas',
                     gsScore     = score',
                     gsFinished  = finished }
@@ -76,20 +75,18 @@ processFinishConditions state state' =
 
         robotPosition' = findRobot field'
     in if hasObject field robotPosition' OpenLift
-       then GameState { gsActions   = [],
-                        gsMineState = mineState',
-                        gsLambdas   = lambdas',
-                        gsScore     = score' + lambdas' * lambdaLiftScore,
-                        gsFinished  = True }
+       then state' { gsMineState = mineState',
+                     gsLambdas   = lambdas',
+                     gsScore     = score' + lambdas' * lambdaLiftScore,
+                     gsFinished  = True }
        else let (x, y) = robotPosition'
             in if hasObject field  (x, y - 1) Empty &&
                   hasObject field' (x, y - 1) Rock
                   -- TODO: Check water level and waterproof.
-               then GameState { gsActions   = [],
-                                gsMineState = mineState',
-                                gsLambdas   = lambdas',
-                                gsScore     = score',
-                                gsFinished  = True }
+               then state' { gsMineState = mineState',
+                             gsLambdas   = lambdas',
+                             gsScore     = score',
+                             gsFinished  = True }
                else state'
 
 moveRobot :: Field -> Action -> (Field, Point)
