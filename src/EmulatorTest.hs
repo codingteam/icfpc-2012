@@ -203,3 +203,6 @@ main = do
                     gsFinished  = True,
                     gsTurns     = 1,
                     gsActions   = [AWait] }
+
+    -- TODO: Trampoline tests.
+    -- TODO: Beard & razor tests.
