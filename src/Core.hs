@@ -9,6 +9,8 @@ module Core (
 ) where
 
 data Cell = Empty | Earth | Wall | Rock | Lambda | Robot | ClosedLift | OpenLift
+            | Trampoline String
+            | Target String
      deriving (Eq, Show)
 
 data Action = ALeft | ARight | AUp | ADown | AWait | AAbort

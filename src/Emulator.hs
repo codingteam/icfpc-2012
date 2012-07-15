@@ -128,6 +128,15 @@ hasObject :: Field -> Point -> Cell -> Bool
 hasObject field point object =
     isOnField field point && getObject field point == object
 
+hasTrampoline :: Field -> Point -> Bool
+hasTrampoline field point =
+    let onField = isOnField field point
+        cell    = getObject field point
+        isTrampoline = case cell of
+                           Trampoline _ -> True
+                           _            -> False
+    in  onField && isTrampoline
+
 updateMineState :: MineState -> MineState
 updateMineState mineState =
     let field      = msField mineState
@@ -165,6 +174,7 @@ isRobotInWater field waterLevel =
 isPassableForRobot :: Field -> Point -> Action -> Bool
 isPassableForRobot field point action =
     any (\o -> hasObject field point o) [Empty, Earth, Lambda, OpenLift]
+    || hasTrampoline field point
     || (any (\a -> action == a) [ALeft, ARight]
         && hasObject field point Rock && rockMovable field point action)
     where rockMovable :: Field -> Point -> Action -> Bool
@@ -182,9 +192,22 @@ getRobotPosition field action (x, y) =
                                   ADown  -> (x, y + 1)
                                   ALeft  -> (x - 1, y)
                                   ARight -> (x + 1, y)
+        cell = getObject field position
     in  if isPassableForRobot field position action
-        then position
+        then case cell of
+                 Trampoline key -> getTargetPosition field key
+                 _              -> position
         else (x, y)
+
+getTargetPosition :: Field -> String -> Point
+getTargetPosition field key =
+    let y   = fromJust $ findIndex (\row -> any isTarget row) field
+        row = field !! y
+        x   = fromJust $ findIndex isTarget row
+    in  (x, y)
+    where isTarget cell = case cell of
+                              Target k | k == key -> True
+                              _                   -> False
 
 replaceCell :: Field -> Point -> Cell -> Field
 replaceCell field (x, y) cell =
