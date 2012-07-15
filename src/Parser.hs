@@ -12,6 +12,8 @@ charToCell ch = case ch of ' ' -> Empty
                            '\\' -> Lambda
                            'R' -> Robot
                            'L' -> ClosedLift
+                           'W' -> Beard
+                           '!' -> Razor
                            _ | any (\c -> c == ch) ['A'..'I'] -> Trampoline (ch, '\0')
                            _ | any (\c -> c == ch) ['1'..'9'] -> Target ch
                            _   -> Wall
@@ -26,6 +28,8 @@ parseParameter mineState parameter =
   case name of
     "Water"      -> mineState {msWater = read rest}
     "Flooding"   -> mineState {msFlooding = read rest}
+    "Growth"     -> mineState { msBeardGrowth = read rest }
+    "Razor"      -> mineState { msRazors = read rest }
     "Waterproof" -> let waterproof = read rest
                     in  mineState { msWaterproof        = waterproof,
                                     msCurrentWaterproof = waterproof }
