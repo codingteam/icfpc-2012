@@ -195,8 +195,8 @@ getRobotPosition field action (x, y) =
         cell = getObject field position
     in  if isPassableForRobot field position action
         then case cell of
-                 Trampoline key -> getTargetPosition field key
-                 _              -> position
+                 Trampoline (_, key) -> getTargetPosition field key
+                 _                   -> position
         else (x, y)
 
 getTargetPosition :: Field -> String -> Point
