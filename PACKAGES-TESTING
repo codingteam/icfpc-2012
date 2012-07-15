@@ -1,2 +1,3 @@
 ghc
 libghc-stm-dev
+libghc-random-dev
