@@ -1,0 +1,4 @@
+#!/bin/sh
+
+ghc --make -isrc/ src/lifter.hs
+cp src/lifter ./
