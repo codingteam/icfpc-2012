@@ -7,6 +7,20 @@ import Core
 
 type TestCase = (GameState, Action)
 
+-- Default states:
+mineState = MineState { msField      = [],
+                        msWater      = defaultWater,
+                        msFlooding   = defaultFlooding,
+                        msWaterproof = defaultWaterproof }
+
+gameState = GameState { gsMineState = mineState,
+                        gsLambdas   = 0,
+                        gsScore     = 0,
+                        gsFinished  = False,
+                        gsTurns     = 0,
+                        gsActions   = [] }
+
+-- Test functions:
 test :: Show a => a -> TestCase -> GameState -> IO()
 test n (state, action) expected =
     let result = emulate state action
@@ -19,25 +33,20 @@ test n (state, action) expected =
 doTest :: Show a => a -> Field -> Int -> Int -> Action
        -> Field -> Int -> Int -> Bool -> IO()
 doTest n field lambdas score action field' lambdas' score' finished =
-    test n (GameState { gsMineState = MineState { msField      = field,
-                                                  msWater      = defaultWater,
-                                                  msFlooding   = defaultFlooding,
-                                                  msWaterproof = defaultWaterproof },
+    test n (gameState { gsMineState = mineState { msField = field },
                         gsLambdas   = lambdas,
                         gsScore     = score,
                         gsFinished  = False,
                         gsTurns     = 1,
                         gsActions   = [] }, action)
-           GameState { gsMineState = MineState { msField      = field',
-                                                 msWater      = defaultWater,
-                                                 msFlooding   = defaultFlooding,
-                                                 msWaterproof = defaultWaterproof },
+           GameState { gsMineState = mineState { msField = field' },
                        gsLambdas   = lambdas',
                        gsScore     = score',
                        gsFinished  = finished,
                        gsTurns     = 1,
                        gsActions   = [action] }
 
+-- Entry point:
 main :: IO()
 main = do
     -- Movement:
