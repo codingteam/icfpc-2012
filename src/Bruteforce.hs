@@ -21,6 +21,7 @@ actionToChar action =
     ADown  -> 'D'
     AWait  -> 'W'
     AAbort -> 'A'
+    ARazor -> 'S'
 
 output :: GameState -> IO ()
 output gameState =
