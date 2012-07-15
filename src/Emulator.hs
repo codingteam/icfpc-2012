@@ -1,5 +1,6 @@
 module Emulator (
-    emulate
+    emulate,
+    validate
 ) where
 
 import Data.List (findIndex)
@@ -22,6 +23,13 @@ emulate state action =
                      else processFinishConditions state $ processEnvironment state'
 
     in  finalState { gmActions = actions ++ [action] }
+
+validate :: GameState -> Action -> Bool
+validate gameState action =
+    let field = msField $ gmMineState gameState
+        robot = findRobot field
+    in  action == AWait
+        || getRobotPosition field action robot /= robot
 
 processAction :: GameState -> Action -> GameState
 processAction state action =

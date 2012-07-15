@@ -23,6 +23,12 @@ output gameState =
      putStr " "
      putStrLn $ show $ gmScore gameState
 
+abortGame :: GameState -> GameState
+abortGame state =
+    if gmFinished state
+    then state
+    else emulate state AAbort
+
 bruteforce :: Int -> GameState -> TVar GameState -> IO ()
 bruteforce steps gameState var
   | steps <= 0           = return ()
@@ -32,8 +38,7 @@ bruteforce steps gameState var
           let nextGameState = emulate gameState action
           in do bestGameState <- atomically $ readTVar var
                 if gmScore bestGameState < gmScore nextGameState
-                  then do atomically $ writeTVar var nextGameState
+                  then do atomically $ writeTVar var $ abortGame nextGameState
                           bruteforce (steps - 1) nextGameState var
                   else bruteforce (steps - 1) nextGameState var
-    in do sequence_ $ map handleAction [ALeft, ARight, AUp, ADown, AWait, AAbort]
-
+    in sequence_ $ map handleAction $ filter (validate gameState) [ALeft, ARight, AUp, ADown, AWait, AAbort]
