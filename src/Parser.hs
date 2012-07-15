@@ -14,6 +14,7 @@ charToCell ch = case ch of ' ' -> Empty
                            'L' -> ClosedLift
                            'W' -> Beard
                            '!' -> Razor
+                           '@' -> Horock
                            _ | any (\c -> c == ch) ['A'..'I'] -> Trampoline (ch, '\0')
                            _ | any (\c -> c == ch) ['1'..'9'] -> Target ch
                            _   -> Wall

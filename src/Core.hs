@@ -8,7 +8,9 @@ module Core (
     sizeX, sizeY
 ) where
 
-data Cell = Empty | Earth | Wall | Rock | Lambda | Robot | ClosedLift | OpenLift | Beard | Razor
+data Cell = Empty | Earth | Wall | Rock | Lambda | Robot | ClosedLift | OpenLift
+            | Beard | Razor
+            | Horock
             | Trampoline (Char, Char) -- key, targetKey
             | Target Char -- key
      deriving (Eq, Show)
