@@ -274,3 +274,23 @@ main = do
     doTest "no razors"
         [[Robot, Beard]] 0 0 ARazor
         [[Robot, Beard]] 0 (-1) False
+
+    -- Horock falling test:
+    doTest "horock fall"
+        [[Robot, Horock], [Empty, Empty], [Empty, Empty]] 0 0 AWait
+        [[Robot, Empty], [Empty, Horock], [Empty, Empty]] 0 (-1) False
+
+    -- Horock sliding and smashing test:
+    doTest "horock slide"
+        [[Robot, Empty, Horock], [Empty, Empty, Horock]] 0 0 AWait
+        [[Robot, Empty, Empty], [Empty, Lambda, Horock]] 0 (-1) False
+
+    -- Horock killing test:
+    doTest "horock kill"
+        [[Horock], [Empty], [Robot]] 0 0 AWait
+        [[Empty], [Lambda], [Robot]] 0 (-1) True
+
+    -- Horock lift test:
+    doTest "horock lift"
+        [[Robot, Horock, ClosedLift]] 0 0 AWait
+        [[Robot, Horock, ClosedLift]] 0 (-1) False
