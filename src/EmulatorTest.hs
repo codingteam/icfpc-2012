@@ -19,22 +19,22 @@ test n (state, action) expected =
 doTest :: Show a => a -> Field -> Int -> Int -> Action
        -> Field -> Int -> Int -> Bool -> IO()
 doTest n field lambdas score action field' lambdas' score' finished =
-    test n (GameState { gmMineState = MineState { msField      = field,
+    test n (GameState { gsMineState = MineState { msField      = field,
                                                   msWater      = defaultWater,
                                                   msFlooding   = defaultFlooding,
                                                   msWaterproof = defaultWaterproof },
-                        gmLambdas   = lambdas,
-                        gmScore     = score,
-                        gmFinished  = False,
-                        gmActions   = [] }, action)
-           GameState { gmMineState = MineState { msField      = field',
+                        gsLambdas   = lambdas,
+                        gsScore     = score,
+                        gsFinished  = False,
+                        gsActions   = [] }, action)
+           GameState { gsMineState = MineState { msField      = field',
                                                  msWater      = defaultWater,
                                                  msFlooding   = defaultFlooding,
                                                  msWaterproof = defaultWaterproof },
-                       gmLambdas   = lambdas',
-                       gmScore     = score',
-                       gmFinished  = finished,
-                       gmActions   = [action] }
+                       gsLambdas   = lambdas',
+                       gsScore     = score',
+                       gsFinished  = finished,
+                       gsActions   = [action] }
 
 main :: IO()
 main = do

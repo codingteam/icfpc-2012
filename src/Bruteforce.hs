@@ -19,25 +19,25 @@ actionToChar action =
 
 output :: GameState -> IO ()
 output gameState =
-  do putStr $ map actionToChar $ gmActions gameState
+  do putStr $ map actionToChar $ gsActions gameState
      putStr " "
-     putStrLn $ show $ gmScore gameState
+     putStrLn $ show $ gsScore gameState
 
 abortGame :: GameState -> GameState
 abortGame state =
-    if gmFinished state
+    if gsFinished state
     then state
     else emulate state AAbort
 
 bruteforce :: Int -> GameState -> TVar GameState -> IO ()
 bruteforce steps gameState var
   | steps <= 0           = return ()
-  | gmFinished gameState = return ()
+  | gsFinished gameState = return ()
   | otherwise            =
     let handleAction action =
           let nextGameState = emulate gameState action
           in do bestGameState <- atomically $ readTVar var
-                if gmScore bestGameState < gmScore nextGameState
+                if gsScore bestGameState < gsScore nextGameState
                   then do atomically $ writeTVar var $ abortGame nextGameState
                           bruteforce (steps - 1) nextGameState var
                   else bruteforce (steps - 1) nextGameState var

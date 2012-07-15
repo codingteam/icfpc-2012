@@ -24,11 +24,11 @@ data MineState = MineState {
 } deriving (Eq, Show)
 
 data GameState = GameState {
-    gmLambdas   :: Int,
-    gmScore     :: Int,
-    gmMineState :: MineState,
-    gmFinished  :: Bool,
-    gmActions   :: [Action]
+    gsLambdas   :: Int,
+    gsScore     :: Int,
+    gsMineState :: MineState,
+    gsFinished  :: Bool,
+    gsActions   :: [Action]
 } deriving (Eq, Show)
 
 defaultWater :: Int

@@ -8,10 +8,10 @@ main :: IO ()
 main = do
     mine <- readInput
     let gameState = GameState {
-                      gmMineState = mine,
-                      gmLambdas   = 0,
-                      gmScore     = 0,
-                      gmFinished  = False,
-                      gmActions   = [] }
+                      gsMineState = mine,
+                      gsLambdas   = 0,
+                      gsScore     = 0,
+                      gsFinished  = False,
+                      gsActions   = [] }
     handleSignals gameState (bruteforce 5 gameState) output
 

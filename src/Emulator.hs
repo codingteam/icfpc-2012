@@ -15,27 +15,27 @@ lambdaLiftScore = 50
 
 emulate :: GameState -> Action -> GameState
 emulate state action =
-    let actions  = gmActions state
+    let actions  = gsActions state
         state'   = processAction state action
-        finished = gmFinished state'
+        finished = gsFinished state'
         finalState = if finished
                      then state'
                      else processFinishConditions state $ processEnvironment state'
 
-    in  finalState { gmActions = actions ++ [action] }
+    in  finalState { gsActions = actions ++ [action] }
 
 validate :: GameState -> Action -> Bool
 validate gameState action =
-    let field = msField $ gmMineState gameState
+    let field = msField $ gsMineState gameState
         robot = findRobot field
     in  action == AWait
         || getRobotPosition field action robot /= robot
 
 processAction :: GameState -> Action -> GameState
 processAction state action =
-    let mineState  = gmMineState state
-        lambdas    = gmLambdas state
-        score      = gmScore state
+    let mineState  = gsMineState state
+        lambdas    = gsLambdas state
+        score      = gsScore state
 
         field      = msField mineState
 
@@ -51,45 +51,45 @@ processAction state action =
         score' = score + scoreDelta
 
         finished = action == AAbort
-    in  GameState { gmActions   = [],
-                    gmMineState = mineState',
-                    gmLambdas   = lambdas',
-                    gmScore     = score',
-                    gmFinished  = finished }
+    in  GameState { gsActions   = [],
+                    gsMineState = mineState',
+                    gsLambdas   = lambdas',
+                    gsScore     = score',
+                    gsFinished  = finished }
 
 processEnvironment :: GameState -> GameState
 processEnvironment state =
     -- TODO: Process flooding.
-    let mineState = gmMineState state
+    let mineState = gsMineState state
         mineState' = updateMineState mineState
-    in  state { gmMineState = mineState' }
+    in  state { gsMineState = mineState' }
 
 processFinishConditions :: GameState -> GameState -> GameState
 processFinishConditions state state' =
-    let mineState  = gmMineState state
-        mineState' = gmMineState state'
-        lambdas'   = gmLambdas state'
-        score'     = gmScore state'
+    let mineState  = gsMineState state
+        mineState' = gsMineState state'
+        lambdas'   = gsLambdas state'
+        score'     = gsScore state'
 
         field      = msField mineState
         field'     = msField mineState'
 
         robotPosition' = findRobot field'
     in if hasObject field robotPosition' OpenLift
-       then GameState { gmActions   = [],
-                        gmMineState = mineState',
-                        gmLambdas   = lambdas',
-                        gmScore     = score' + lambdas' * lambdaLiftScore,
-                        gmFinished  = True }
+       then GameState { gsActions   = [],
+                        gsMineState = mineState',
+                        gsLambdas   = lambdas',
+                        gsScore     = score' + lambdas' * lambdaLiftScore,
+                        gsFinished  = True }
        else let (x, y) = robotPosition'
             in if hasObject field  (x, y - 1) Empty &&
                   hasObject field' (x, y - 1) Rock
                   -- TODO: Check water level and waterproof.
-               then GameState { gmActions   = [],
-                                gmMineState = mineState',
-                                gmLambdas   = lambdas',
-                                gmScore     = score',
-                                gmFinished  = True }
+               then GameState { gsActions   = [],
+                                gsMineState = mineState',
+                                gsLambdas   = lambdas',
+                                gsScore     = score',
+                                gsFinished  = True }
                else state'
 
 moveRobot :: Field -> Action -> (Field, Point)
