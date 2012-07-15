@@ -24,7 +24,9 @@ parseParameter mineState parameter =
   case name of
     "Water"      -> mineState {msWater = read rest}
     "Flooding"   -> mineState {msFlooding = read rest}
-    "Waterproof" -> mineState {msWaterproof = read rest}
+    "Waterproof" -> let waterproof = read rest
+                    in  mineState { msWaterproof        = waterproof,
+                                    msCurrentWaterproof = waterproof }
     _            -> mineState
   where (name, rest) = break isSpace parameter
 
@@ -33,6 +35,7 @@ readInput = do (description, metadata) <- fmap (break null . lines) getContents
                let mineState = MineState {msField = map (map charToCell) $ padLines description,
                                           msWater = defaultWater,
                                           msFlooding = defaultFlooding,
-                                          msWaterproof = defaultWaterproof}
+                                          msWaterproof = defaultWaterproof,
+                                          msCurrentWaterproof = defaultWaterproof,
+                                          msTurns = 0}
                return (foldl parseParameter mineState metadata)
-               
