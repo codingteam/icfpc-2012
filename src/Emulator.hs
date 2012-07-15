@@ -37,14 +37,16 @@ processWaterproof :: GameState -> GameState
 processWaterproof gameState =
     let mineState  = gsMineState gameState
 
-        field      = msField mineState
-        water      = msWater mineState
-        waterproof = msWaterproof mineState
+        field             = msField mineState
+        water             = msWater mineState
+        waterproof        = msWaterproof mineState
+        currentWaterproof = msCurrentWaterproof mineState
 
-        waterproof' = if isRobotInWater field water
-                      then waterproof - 1
-                      else waterproof
-    in  gameState { gsMineState = mineState { msWaterproof = waterproof' }}
+        currentWaterproof' = if isRobotInWater field water
+                             then currentWaterproof - 1
+                             else waterproof
+    in  gameState { gsMineState =
+                        mineState { msCurrentWaterproof = currentWaterproof' } }
 
 processAction :: GameState -> Action -> GameState
 processAction gameState action =
@@ -84,23 +86,19 @@ processFinishConditions state state' =
         lambdas'   = gsLambdas state'
         score'     = gsScore state'
 
-        field      = msField mineState
-        field'     = msField mineState'
+        field              = msField mineState
+        field'             = msField mineState'
+        currentWaterproof' = msCurrentWaterproof mineState'
 
         robotPosition' = findRobot field'
     in if hasObject field robotPosition' OpenLift
-       then state' { gsMineState = mineState',
-                     gsLambdas   = lambdas',
-                     gsScore     = score' + lambdas' * lambdaLiftScore,
+       then state' { gsScore     = score' + lambdas' * lambdaLiftScore,
                      gsFinished  = True }
        else let (x, y) = robotPosition'
-            in if hasObject field  (x, y - 1) Empty &&
-                  hasObject field' (x, y - 1) Rock
-                  -- TODO: Check water level and waterproof.
-               then state' { gsMineState = mineState',
-                             gsLambdas   = lambdas',
-                             gsScore     = score',
-                             gsFinished  = True }
+            in if (hasObject field (x, y - 1) Empty
+                   && hasObject field' (x, y - 1) Rock)
+                  || (currentWaterproof' <= 0)
+               then state' { gsFinished  = True }
                else state'
 
 moveRobot :: Field -> Action -> (Field, Point)

@@ -17,11 +17,12 @@ data Action = ALeft | ARight | AUp | ADown | AWait | AAbort
 type Field = [[Cell]]
 
 data MineState = MineState {
-    msField      :: Field,
-    msWater      :: Int,
-    msFlooding   :: Int,
-    msWaterproof :: Int,
-    msTurns      :: Int
+    msField             :: Field,
+    msWater             :: Int,
+    msFlooding          :: Int,
+    msWaterproof        :: Int,
+    msCurrentWaterproof :: Int,
+    msTurns             :: Int
 } deriving (Eq, Show)
 
 data GameState = GameState {

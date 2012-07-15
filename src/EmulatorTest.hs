@@ -8,11 +8,12 @@ import Core
 type TestCase = (GameState, Action)
 
 -- Default states:
-mineState = MineState { msField      = [],
-                        msWater      = defaultWater,
-                        msFlooding   = defaultFlooding,
-                        msWaterproof = defaultWaterproof,
-                        msTurns      = 0 }
+mineState = MineState { msField             = [],
+                        msWater             = defaultWater,
+                        msFlooding          = defaultFlooding,
+                        msWaterproof        = defaultWaterproof,
+                        msCurrentWaterproof = defaultWaterproof,
+                        msTurns             = 0 }
 
 gameState = GameState { gsMineState = mineState,
                         gsLambdas   = 0,
@@ -196,27 +197,39 @@ main = do
 
     -- Decrementing waterproof:
     test "waterproof"
-        (gameState { gsMineState = mineState { msField      = [[Robot]],
-                                               msWater      = 1,
-                                               msWaterproof = 2 } }, AWait)
-        gameState { gsMineState = mineState { msField      = [[Robot]],
-                                              msWater      = 1,
-                                              msWaterproof = 1,
-                                              msTurns      = 1 },
+        (gameState { gsMineState = mineState { msField             = [[Robot]],
+                                               msWater             = 1,
+                                               msCurrentWaterproof = 2 } }, AWait)
+        gameState { gsMineState = mineState { msField             = [[Robot]],
+                                              msWater             = 1,
+                                              msCurrentWaterproof = 1,
+                                              msTurns             = 1 },
                     gsScore     = -1,
                     gsActions   = [AWait] }
 
     -- Drawning:
     test "drawn"
-        (gameState { gsMineState = mineState { msField      = [[Robot]],
-                                               msWater      = 1,
-                                               msWaterproof = 0 } }, AWait)
-        gameState { gsMineState = mineState { msField      = [[Robot]],
-                                              msWater      = 1,
-                                              msWaterproof = 1,
-                                              msTurns      = 1 },
+        (gameState { gsMineState = mineState { msField             = [[Robot]],
+                                               msWater             = 1,
+                                               msCurrentWaterproof = 1 } }, AWait)
+        gameState { gsMineState = mineState { msField             = [[Robot]],
+                                              msWater             = 1,
+                                              msCurrentWaterproof = 0,
+                                              msTurns             = 1 },
                     gsScore     = -1,
                     gsFinished  = True,
+                    gsActions   = [AWait] }
+
+    -- Waterproof restoring:
+    test "waterproof restore"
+        (gameState { gsMineState = mineState { msField             = [[Robot]],
+                                               msWaterproof        = 10,
+                                               msCurrentWaterproof = 1 } }, AWait)
+        gameState { gsMineState = mineState { msField             = [[Robot]],
+                                              msWaterproof        = 10,
+                                              msCurrentWaterproof = 10,
+                                              msTurns             = 1 },
+                    gsScore     = -1,
                     gsActions   = [AWait] }
 
     -- TODO: Trampoline tests.
