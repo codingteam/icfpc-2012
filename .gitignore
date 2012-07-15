@@ -8,3 +8,4 @@ src/EmulatorTest
 src/handlerTest
 src/lifter
 src/TestBruteforce
+icfp-*.tgz
