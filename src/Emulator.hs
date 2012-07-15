@@ -22,7 +22,7 @@ emulate gameState action =
         gameState3 =
             if finished2
             then gameState2
-            else processFinishConditions gameState $ processEnvironment gameState2
+            else processFinishConditions gameState2 $ processEnvironment gameState2
 
     in  gameState3 { gsActions = actions ++ [action] }
 
