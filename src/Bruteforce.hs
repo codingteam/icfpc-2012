@@ -2,8 +2,13 @@ module Bruteforce (
   bruteforce, output
 ) where
 
+import Control.Monad
 import Control.Concurrent
 import Control.Concurrent.STM
+
+import System.Random
+import Data.Array.IO
+
 import Core
 import Emulator
 
@@ -42,4 +47,19 @@ bruteforce steps gameState var
                   then do atomically $ writeTVar var $ abortedNextGameState
                           bruteforce (steps - 1) nextGameState var
                   else bruteforce (steps - 1) nextGameState var
-    in sequence_ $ map handleAction $ filter (validate gameState) [ALeft, ARight, AUp, ADown, AWait, AAbort]
+        availableActions = [ALeft, ARight, AUp, ADown, AWait, AAbort, ARazor]
+    in do validActions <- shuffle $ filter (validate gameState) availableActions
+          sequence_ $ map handleAction validActions
+
+shuffle :: [a] -> IO [a]
+shuffle xs =
+  do ar <- newArray n xs
+     forM [1 .. n] $ \i ->
+       do j <- randomRIO (i, n)
+          vi <- readArray ar i
+          vj <- readArray ar j
+          writeArray ar j vi
+          return vj
+  where n = length xs
+        newArray :: Int -> [a] -> IO (IOArray Int a)
+        newArray n xs = newListArray (1, n) xs
