@@ -170,17 +170,18 @@ updateMineState mineState =
         maxX = sizeX field - 1
         maxY = sizeY field - 1
 
+        turns'        = turns + 1
         coords        = [(x, y) | y <- [maxY, maxY - 1..0], x <- [0..maxX]]
-        mustGrowBeard = beardGrowth /= 0 && turns `div` beardGrowth == 0
+        mustGrowBeard = beardGrowth /= 0 && turns' `mod` beardGrowth == 0
         field'        = foldl (\field' p -> updateCell field (field', mustGrowBeard) p) field coords
 
-        water' = if flooding /= 0 && turns `div` flooding == 0
+        water' = if flooding /= 0 && turns' `mod` flooding == 0
                  then water + 1
                  else water
 
     in  mineState { msField      = field',
                     msWater      = water',
-                    msTurns      = turns + 1 }
+                    msTurns      = turns' }
 
 findRobot :: Field -> Point
 findRobot field =
