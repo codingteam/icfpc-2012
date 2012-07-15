@@ -31,7 +31,7 @@ validate gameState action =
     let field = msField $ gsMineState gameState
         robot = findRobot field
     in  action == AWait
-        || getRobotPosition field action robot /= robot
+        || (fst $ getRobotPosition field action robot) /= robot
 
 processWaterproof :: GameState -> GameState
 processWaterproof gameState =
@@ -104,17 +104,19 @@ actRobot :: MineState -> Action -> (MineState, Point)
 actRobot mineState action =
     let field = msField mineState
         position  = findRobot field
-        position1 = getRobotPosition field action position
+        (position1, rest) = getRobotPosition field action position
         field1    = if hasObject field position1 Rock
                     then moveRock field position1 action
                     else field
 
-        field2  = replaceCell field1 position Empty
-        field3  = replaceCell field2 position1 Robot
+        field2 = emptyCells field1 (position : rest)
+        field3 = replaceCell field2 position1 Robot
         mineState3 = mineState { msField = field3 }
 
         mineState4 = processRobotAct mineState3 action position
     in  (mineState4, position1)
+    where emptyCells field points =
+              foldl (\field' point -> replaceCell field' point Empty) field points
 
 processRobotAct :: MineState -> Action -> Point -> MineState
 processRobotAct mineState action point =
@@ -204,7 +206,8 @@ isPassableForRobot field point action =
                                      ARight -> (x + 1, y)
               in  hasObject field rockPosition Empty
 
-getRobotPosition :: Field -> Action -> Point -> Point
+-- getRobotPosition returns target point and any additional points to be cleaned after turn.
+getRobotPosition :: Field -> Action -> Point -> (Point, [Point])
 getRobotPosition field action (x, y) =
     let position = case action of AWait  -> (x, y)
                                   AAbort -> (x, y)
@@ -216,9 +219,9 @@ getRobotPosition field action (x, y) =
         cell = getObject field position
     in  if isPassableForRobot field position action
         then case cell of
-                 Trampoline (_, key) -> getTargetPosition field key
-                 _                   -> position
-        else (x, y)
+                 Trampoline (_, key) -> (getTargetPosition field key, [position])
+                 _                   -> (position, [])
+        else ((x, y), [])
 
 getTargetPosition :: Field -> Char -> Point
 getTargetPosition field key =
