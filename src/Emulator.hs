@@ -161,18 +161,23 @@ hasTrampoline field point =
 
 updateMineState :: MineState -> MineState
 updateMineState mineState =
-    let field      = msField mineState
-        water      = msWater mineState
-        flooding   = msFlooding mineState
-        turns      = msTurns mineState
+    let field       = msField mineState
+        water       = msWater mineState
+        flooding    = msFlooding mineState
+        beardGrowth = msBeardGrowth mineState
+        turns       = msTurns mineState
 
-        width  = sizeX field
-        height = sizeY field
+        maxX = sizeX field - 1
+        maxY = sizeY field - 1
 
-        field' = mapi (\row y -> mapi (\cell x -> updateCell field (x, y)) row) field
+        coords        = [(x, y) | y <- [maxY, maxY - 1..0], x <- [0..maxX]]
+        mustGrowBeard = beardGrowth /= 0 && turns `div` beardGrowth == 0
+        field'        = foldl (\field' p -> updateCell field (field', mustGrowBeard) p) field coords
+
         water' = if flooding /= 0 && turns `div` flooding == 0
                  then water + 1
                  else water
+
     in  mineState { msField      = field',
                     msWater      = water',
                     msTurns      = turns + 1 }
@@ -238,51 +243,52 @@ replaceCell field (x, y) cell =
     mapi (\row y' -> mapi (\cell' x' ->
             if (x, y) == (x', y') then cell else cell') row) field
 
+moveCell :: Field -> Point -> Point -> Field
+moveCell field point1 point2 =
+    let cell1  = getObject field point1
+        field' = replaceCell field point1 Empty
+    in  replaceCell field' point2 cell1
+
 mapi :: (a -> Int -> a) -> [a] -> [a]
 mapi fn xs = zipWith fn xs [0..]
 
-updateCell :: Field -> Point -> Cell
-updateCell field point =
-    case getObject field point of
-        ClosedLift | noLambdas field              -> OpenLift
-        Rock       | moveRockFromHere field point -> Empty
-        Empty      | moveRockHere field point     -> Rock
-        other                                     -> other
-    where moveRockFromHere field (x, y) =
-              -- Free fall:
-              hasObject field (x, y + 1) Empty ||
-              -- Slide from rock:
-              (hasObject field (x, y + 1) Rock &&
-               ((hasObject field (x + 1, y) Empty &&
-                 hasObject field (x + 1, y + 1) Empty) ||
-                 (hasObject field (x - 1, y) Empty &&
-                  hasObject field (x - 1, y + 1) Empty))) ||
-              -- Slide from lambda:
-              (hasObject field (x, y + 1) Lambda &&
-               (hasObject field (x + 1, y) Empty &&
-                hasObject field (x + 1, y + 1) Empty))
-          moveRockHere field (x, y) =
-              hasObject field (x, y) Empty &&
-              -- Free fall:
-              hasObject field (x, y - 1) Rock ||
-              -- Slide from a lamdba:
-              ((hasObject field (x - 1, y - 1) Rock &&
-                hasObject field (x - 1, y) Lambda &&
-                hasObject field (x, y - 1) Empty) ||
-               -- Slide from a rock (right side):
-               (hasObject field (x - 1, y - 1) Rock &&
-                hasObject field (x - 1, y) Rock &&
-                hasObject field (x, y - 1) Empty) ||
-               -- Slide from a rock (left side) only if right side blocked:
-               (hasObject field (x, y - 1) Empty &&
-                hasObject field (x + 1, y - 1) Rock &&
-                hasObject field (x + 1, y) Rock &&
-                (not (hasObject field (x + 2, y - 1) Empty) ||
-                 not (hasObject field (x + 2, y) Empty))))
+updateCell :: Field -> (Field, Bool) -> Point -> Field
+updateCell field (field', mustGrowBeard) (x, y) =
+    case getObject field (x, y) of
+        ClosedLift | noLambdas     -> openLift
+        Rock       | mustMoveRock  -> moveRock ()
+        Beard      | mustGrowBeard -> growBeard
+        _                          -> field'
+    where -- Lifts:
+          noLambdas =
+              let width  = sizeX field
+                  height = sizeY field
+              in  all (\p -> getObject field p /= Lambda) [(x, y) | x <- [0..width - 1],
+                                                                    y <- [0..height - 1]]
 
-noLambdas :: Field -> Bool
-noLambdas field =
-    let width  = sizeX field
-        height = sizeY field
-    in  all (\p -> getObject field p /= Lambda) [(x, y) | x <- [0..width - 1],
-                                                          y <- [0..height - 1]]
+          openLift = replaceCell field' (x, y) OpenLift
+
+          -- Rocks:
+          mustMoveRock = canFall || canSlide
+          canFall  = hasObject field (x, y + 1) Empty
+          canSlide = canSlideLeft || canSlideRight
+          canSlideLeft = (hasObject field (x, y + 1) Rock) &&
+                         (hasObject field (x - 1, y) Empty && hasObject field (x - 1, y + 1) Empty)
+          canSlideRight = (hasObject field (x, y + 1) Rock || hasObject field (x, y + 1) Lambda) &&
+                         (hasObject field (x + 1, y) Empty && hasObject field (x + 1, y + 1) Empty)
+
+          moveRock () | canFall       = fall
+          moveRock () | canSlideLeft  = slideLeft
+          moveRock () | canSlideRight = slideRight
+
+          fall       = moveCell field' (x, y) (x,     y + 1)
+          slideLeft  = moveCell field' (x, y) (x - 1, y + 1)
+          slideRight = moveCell field' (x, y) (x + 1, y + 1)
+
+          -- Beards:
+          growBeard  = let coords = [(x', y') | x' <- [x - 1..x + 1], y' <- [y - 1..y + 1]]
+                       in  foldl beard field' coords
+                       where beard f p = let cell = getObject field p
+                                         in  if isOnField f p && cell == Empty
+                                             then replaceCell f p Beard
+                                             else f
