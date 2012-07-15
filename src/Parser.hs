@@ -12,6 +12,8 @@ charToCell ch = case ch of ' ' -> Empty
                            '\\' -> Lambda
                            'R' -> Robot
                            'L' -> ClosedLift
+                           _ | any (\c -> c == ch) ['A'..'I'] -> Trampoline (ch, '\0')
+                           _ | any (\c -> c == ch) ['1'..'9'] -> Target ch
                            _   -> Wall
 
 extendLine size line = line ++ replicate n ' '
@@ -27,8 +29,21 @@ parseParameter mineState parameter =
     "Waterproof" -> let waterproof = read rest
                     in  mineState { msWaterproof        = waterproof,
                                     msCurrentWaterproof = waterproof }
+    "Trampoline" -> let [trampoline] : _ : [target] : [] = words rest
+                    in  linkTrampoline mineState trampoline target
     _            -> mineState
   where (name, rest) = break isSpace parameter
+        linkTrampoline mineState trampoline target =
+            let field  = msField mineState
+                field' = map (\row ->
+                                  map (\cell ->
+                                           mapTrampoline cell trampoline target) row) field
+            in  mineState { msField = field' }
+        mapTrampoline cell trampolineKey targetKey =
+            case cell of
+            Trampoline (key, '\0') | key == trampolineKey ->
+                Trampoline (key, targetKey)
+            other -> other
 
 readInput :: IO MineState
 readInput = do (description, metadata) <- fmap (break null . lines) getContents

@@ -199,7 +199,7 @@ getRobotPosition field action (x, y) =
                  _                   -> position
         else (x, y)
 
-getTargetPosition :: Field -> String -> Point
+getTargetPosition :: Field -> Char -> Point
 getTargetPosition field key =
     let y   = fromJust $ findIndex (\row -> any isTarget row) field
         row = field !! y
