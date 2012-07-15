@@ -234,5 +234,40 @@ main = do
                     gsScore     = -1,
                     gsActions   = [AWait] }
 
-    -- TODO: Trampoline tests.
-    -- TODO: Beard & razor tests.
+    -- TODO: Trampoline test.
+
+    -- Beard growth test:
+    test "beard growth"
+        (gameState { gsMineState = mineState { msField       = [[Robot, Beard, Empty]],
+                                               msBeardGrowth = 2,
+                                               msTurns       = 1 } }, AWait)
+        gameState { gsMineState = mineState { msField       = [[Robot, Beard, Beard]],
+                                              msBeardGrowth = 2,
+                                              msTurns       = 2 },
+                    gsScore     = -1,
+                    gsActions   = [AWait] }
+
+    -- Beard not growth test:
+    test "beard not grow"
+        (gameState { gsMineState = mineState { msField       = [[Robot, Beard, Empty]],
+                                               msBeardGrowth = 2 } }, AWait)
+        gameState { gsMineState = mineState { msField       = [[Robot, Beard, Empty]],
+                                              msBeardGrowth = 2,
+                                              msTurns       = 1 },
+                    gsScore     = -1,
+                    gsActions   = [AWait] }
+
+    -- Razor test:
+    test "razor"
+        (gameState { gsMineState = mineState { msField       = [[Robot, Beard]],
+                                               msRazors      = 1 } }, ARazor)
+        gameState { gsMineState = mineState { msField       = [[Robot, Empty]],
+                                              msRazors      = 0,
+                                              msTurns       = 1 },
+                    gsScore     = -1,
+                    gsActions   = [ARazor] }
+
+    -- Razor test when there are no razors left:
+    doTest "no razors"
+        [[Robot, Beard]] 0 0 ARazor
+        [[Robot, Beard]] 0 (-1) False
