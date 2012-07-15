@@ -8,12 +8,12 @@ module Core (
     sizeX, sizeY
 ) where
 
-data Cell = Empty | Earth | Wall | Rock | Lambda | Robot | ClosedLift | OpenLift
+data Cell = Empty | Earth | Wall | Rock | Lambda | Robot | ClosedLift | OpenLift | Beard | Razor
             | Trampoline (Char, Char) -- key, targetKey
             | Target Char -- key
      deriving (Eq, Show)
 
-data Action = ALeft | ARight | AUp | ADown | AWait | AAbort
+data Action = ALeft | ARight | AUp | ADown | AWait | AAbort | ARazor
      deriving (Eq, Show)
 
 type Field = [[Cell]]
