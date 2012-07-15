@@ -52,5 +52,7 @@ readInput = do (description, metadata) <- fmap (break null . lines) getContents
                                           msFlooding = defaultFlooding,
                                           msWaterproof = defaultWaterproof,
                                           msCurrentWaterproof = defaultWaterproof,
+                                          msBeardGrowth = defaultBeardGrowth,
+                                          msRazors = defaultRazors,
                                           msTurns = 0}
                return (foldl parseParameter mineState metadata)

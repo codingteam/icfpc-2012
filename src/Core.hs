@@ -4,7 +4,7 @@ module Core (
     Field,
     GameState(..),
     MineState(..),
-    defaultWater, defaultFlooding, defaultWaterproof,
+    defaultWater, defaultFlooding, defaultWaterproof, defaultBeardGrowth, defaultRazors,
     sizeX, sizeY
 ) where
 
@@ -23,7 +23,9 @@ data MineState = MineState {
     msWater             :: Int,
     msFlooding          :: Int,
     msWaterproof        :: Int,
+    msBeardGrowth       :: Int,
     msCurrentWaterproof :: Int,
+    msRazors            :: Int,
     msTurns             :: Int
 } deriving (Eq, Show)
 
@@ -43,6 +45,12 @@ defaultFlooding = 0
 
 defaultWaterproof :: Int
 defaultWaterproof = 10
+
+defaultBeardGrowth :: Int
+defaultBeardGrowth = 0
+
+defaultRazors :: Int
+defaultRazors = 0
 
 sizeX :: Field -> Int
 sizeX field = let row = field !! 0

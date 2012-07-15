@@ -12,7 +12,9 @@ mineState = MineState { msField             = [],
                         msWater             = defaultWater,
                         msFlooding          = defaultFlooding,
                         msWaterproof        = defaultWaterproof,
+                        msBeardGrowth       = defaultBeardGrowth,
                         msCurrentWaterproof = defaultWaterproof,
+                        msRazors            = defaultRazors,
                         msTurns             = 0 }
 
 gameState = GameState { gsMineState = mineState,
