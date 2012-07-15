@@ -15,17 +15,16 @@ lambdaLiftScore = 50
 
 emulate :: GameState -> Action -> GameState
 emulate gameState action =
-    let actions  = gsActions gameState
-        turns    = gsTurns gameState
-        gameState'   = processAction gameState action
-        finished = gsFinished gameState'
-        finalState =
-            if finished
-            then gameState'
-            else processFinishConditions gameState $ processEnvironment gameState'
+    let actions    = gsActions gameState
+        gameState1 = processWaterproof gameState
+        gameState2 = processAction gameState1 action
+        finished2  = gsFinished gameState2
+        gameState3 =
+            if finished2
+            then gameState2
+            else processFinishConditions gameState $ processEnvironment gameState2
 
-    in  finalState { gsTurns = turns + 1,
-                     gsActions = actions ++ [action] }
+    in  gameState3 { gsActions = actions ++ [action] }
 
 validate :: GameState -> Action -> Bool
 validate gameState action =
@@ -33,6 +32,19 @@ validate gameState action =
         robot = findRobot field
     in  action == AWait
         || getRobotPosition field action robot /= robot
+
+processWaterproof :: GameState -> GameState
+processWaterproof gameState =
+    let mineState  = gsMineState gameState
+
+        field      = msField mineState
+        water      = msWater mineState
+        waterproof = msWaterproof mineState
+
+        waterproof' = if isRobotInWater field water
+                      then waterproof - 1
+                      else waterproof
+    in  gameState { gsMineState = mineState { msWaterproof = waterproof' }}
 
 processAction :: GameState -> Action -> GameState
 processAction gameState action =
@@ -60,11 +72,10 @@ processAction gameState action =
                     gsFinished  = finished }
 
 processEnvironment :: GameState -> GameState
-processEnvironment state =
-    -- TODO: Process flooding.
-    let mineState = gsMineState state
+processEnvironment gameState =
+    let mineState = gsMineState gameState
         mineState' = updateMineState mineState
-    in  state { gsMineState = mineState' }
+    in  gameState { gsMineState = mineState' }
 
 processFinishConditions :: GameState -> GameState -> GameState
 processFinishConditions state state' =
@@ -124,17 +135,18 @@ updateMineState mineState =
     let field      = msField mineState
         water      = msWater mineState
         flooding   = msFlooding mineState
-        waterproof = msWaterproof mineState
+        turns      = msTurns mineState
 
         width  = sizeX field
         height = sizeY field
 
         field' = mapi (\row y -> mapi (\cell x -> updateCell field (x, y)) row) field
-        -- TODO: Calculate water level and waterproof.
-    in  MineState { msField      = field',
-                    msWater      = water,
-                    msFlooding   = flooding,
-                    msWaterproof = waterproof }
+        water' = if flooding /= 0 && turns `div` flooding == 0
+                 then water + 1
+                 else water
+    in  mineState { msField      = field',
+                    msWater      = water',
+                    msTurns      = turns + 1 }
 
 findRobot :: Field -> Point
 findRobot field =
@@ -144,6 +156,13 @@ findRobot field =
     in  (fromJust cellIndex, rowIndex)
     where hasRobot :: [Cell] -> Bool
           hasRobot cells = any (\c -> c == Robot) cells
+
+isRobotInWater :: Field -> Int -> Bool
+isRobotInWater field waterLevel =
+    let (_, y)     = findRobot field
+        height     = sizeY field
+        robotLevel = height - y
+    in  robotLevel <= waterLevel
 
 isPassableForRobot :: Field -> Point -> Action -> Bool
 isPassableForRobot field point action =

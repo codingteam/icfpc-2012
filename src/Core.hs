@@ -20,7 +20,8 @@ data MineState = MineState {
     msField      :: Field,
     msWater      :: Int,
     msFlooding   :: Int,
-    msWaterproof :: Int
+    msWaterproof :: Int,
+    msTurns      :: Int
 } deriving (Eq, Show)
 
 data GameState = GameState {
@@ -28,7 +29,6 @@ data GameState = GameState {
     gsScore     :: Int,
     gsMineState :: MineState,
     gsFinished  :: Bool,
-    gsTurns     :: Int,
     gsActions   :: [Action]
 } deriving (Eq, Show)
 

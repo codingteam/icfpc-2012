@@ -11,13 +11,13 @@ type TestCase = (GameState, Action)
 mineState = MineState { msField      = [],
                         msWater      = defaultWater,
                         msFlooding   = defaultFlooding,
-                        msWaterproof = defaultWaterproof }
+                        msWaterproof = defaultWaterproof,
+                        msTurns      = 0 }
 
 gameState = GameState { gsMineState = mineState,
                         gsLambdas   = 0,
                         gsScore     = 0,
                         gsFinished  = False,
-                        gsTurns     = 0,
                         gsActions   = [] }
 
 -- Test functions:
@@ -38,11 +38,11 @@ doTest n field lambdas score action field' lambdas' score' finished =
                         gsScore     = score,
                         gsFinished  = False,
                         gsActions   = [] }, action)
-           gameState { gsMineState = mineState { msField = field' },
+           gameState { gsMineState = mineState { msField = field',
+                                                 msTurns = 1 },
                        gsLambdas   = lambdas',
                        gsScore     = score',
                        gsFinished  = finished,
-                       gsTurns     = 1,
                        gsActions   = [action] }
 
 -- Entry point:
@@ -155,14 +155,26 @@ main = do
         [[Rock], [Robot]] 0 (-1) False
 
     -- Aborting the game:
-    doTest "abort"
-        [[Robot]] 1 24 AAbort
-        [[Robot]] 1 49 True
+    test "abort"
+        (gameState { gsMineState = mineState { msField = [[Robot]] },
+                     gsLambdas   = 1,
+                     gsScore     = 24 }, AAbort)
+        gameState { gsMineState = mineState { msField = [[Robot]] },
+                    gsLambdas   = 1,
+                    gsScore     = 49,
+                    gsFinished  = True,
+                    gsActions   = [AAbort] }
 
     -- Aborting the game in the pre-death conditions.
-    doTest "emergency abort"
-        [[Rock], [Empty], [Robot]] 1 0 AAbort
-        [[Rock], [Empty], [Robot]] 1 25 True
+    test "emergency abort"
+        (gameState { gsMineState = mineState { msField = [[Rock], [Empty], [Robot]] },
+                     gsLambdas   = 1,
+                     gsScore     = 0 }, AAbort)
+        gameState { gsMineState = mineState { msField = [[Rock], [Empty], [Robot]] },
+                    gsLambdas   = 1,
+                    gsScore     = 25,
+                    gsFinished  = True,
+                    gsActions   = [AAbort] }
 
     -- Winning the game:
     doTest "win"
@@ -173,12 +185,13 @@ main = do
     test "flooding"
         (gameState { gsMineState = mineState { msField    = [[Robot], [Empty]],
                                                msFlooding = 2,
-                                               msWater    = 0 },
-                     gsTurns     = 1 }, AWait)
+                                               msWater    = 0,
+                                               msTurns    = 1 } }, AWait)
         gameState { gsMineState = mineState { msField    = [[Robot], [Empty]],
                                               msFlooding = 2,
-                                              msWater    = 1 },
-                    gsTurns     = 2,
+                                              msWater    = 1,
+                                              msTurns    = 2 },
+                    gsScore     = -1,
                     gsActions   = [AWait] }
 
     -- Decrementing waterproof:
@@ -188,8 +201,9 @@ main = do
                                                msWaterproof = 2 } }, AWait)
         gameState { gsMineState = mineState { msField      = [[Robot]],
                                               msWater      = 1,
-                                              msWaterproof = 1 },
-                    gsTurns     = 1,
+                                              msWaterproof = 1,
+                                              msTurns      = 1 },
+                    gsScore     = -1,
                     gsActions   = [AWait] }
 
     -- Drawning:
@@ -199,9 +213,10 @@ main = do
                                                msWaterproof = 0 } }, AWait)
         gameState { gsMineState = mineState { msField      = [[Robot]],
                                               msWater      = 1,
-                                              msWaterproof = 1 },
+                                              msWaterproof = 1,
+                                              msTurns      = 1 },
+                    gsScore     = -1,
                     gsFinished  = True,
-                    gsTurns     = 1,
                     gsActions   = [AWait] }
 
     -- TODO: Trampoline tests.
