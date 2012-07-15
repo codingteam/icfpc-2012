@@ -12,7 +12,7 @@ charToCell ch = case ch of ' ' -> Empty
                            '\\' -> Lambda
                            'R' -> Robot
                            'L' -> ClosedLift
-                           other -> error ("Unknown character: " ++ [other])
+                           _   -> Wall
 
 extendLine size line = line ++ replicate n ' '
   where n = max 0 (length line - size)
