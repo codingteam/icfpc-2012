@@ -56,10 +56,9 @@ processAction gameState action =
 
         field      = msField mineState
 
-        (field', robotPos') = moveRobot field action
-        mineState' = mineState { msField      = field' }
+        (mineState', robotPosition') = actRobot mineState action
 
-        lambdaDelta = if hasObject field robotPos' Lambda then 1 else 0
+        lambdaDelta = if hasObject field robotPosition' Lambda then 1 else 0
         lambdas' = lambdas + lambdaDelta
 
         scoreDelta  = lambdaDelta * lambdaScore + if action == AAbort
@@ -101,16 +100,37 @@ processFinishConditions state state' =
                then state' { gsFinished  = True }
                else state'
 
-moveRobot :: Field -> Action -> (Field, Point)
-moveRobot field action =
-    let position  = findRobot field
-        position' = getRobotPosition field action position
-        field'    = if hasObject field position' Rock
-                    then moveRock field position' action
+actRobot :: MineState -> Action -> (MineState, Point)
+actRobot mineState action =
+    let field = msField mineState
+        position  = findRobot field
+        position1 = getRobotPosition field action position
+        field1    = if hasObject field position1 Rock
+                    then moveRock field position1 action
                     else field
-        field''   = replaceCell field' position Empty
-        field'''  = replaceCell field'' position' Robot
-    in  (field''', position')
+
+        field2  = replaceCell field1 position Empty
+        field3  = replaceCell field2 position1 Robot
+        mineState3 = mineState { msField = field3 }
+
+        mineState4 = processRobotAct mineState3 action position
+    in  (mineState4, position1)
+
+processRobotAct :: MineState -> Action -> Point -> MineState
+processRobotAct mineState action point =
+    let field  = msField mineState
+        razors = msRazors mineState
+
+        field'  = case action of
+                  ARazor | razors > 0 -> razor field point
+                  _                   -> field
+        razors' = max (razors - 1) 0
+    in  mineState { msField  = field',
+                    msRazors = razors' }
+    where razor field point =
+              mapi (\row y -> mapi (\cell x -> cleanBeard cell) row) field
+          cleanBeard Beard = Empty
+          cleanBeard cell  = cell
 
 moveRock field (x, y) action =
     let field' = case action of
@@ -188,6 +208,7 @@ getRobotPosition :: Field -> Action -> Point -> Point
 getRobotPosition field action (x, y) =
     let position = case action of AWait  -> (x, y)
                                   AAbort -> (x, y)
+                                  ARazor -> (x, y)
                                   AUp    -> (x, y - 1)
                                   ADown  -> (x, y + 1)
                                   ALeft  -> (x - 1, y)

@@ -47,7 +47,7 @@ defaultWaterproof :: Int
 defaultWaterproof = 10
 
 defaultBeardGrowth :: Int
-defaultBeardGrowth = 0
+defaultBeardGrowth = 25
 
 defaultRazors :: Int
 defaultRazors = 0
