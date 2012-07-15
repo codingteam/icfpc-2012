@@ -36,9 +36,10 @@ bruteforce steps gameState var
   | otherwise            =
     let handleAction action =
           let nextGameState = emulate gameState action
+              abortedNextGameState = abortGame nextGameState
           in do bestGameState <- atomically $ readTVar var
-                if gsScore bestGameState < gsScore nextGameState
-                  then do atomically $ writeTVar var $ abortGame nextGameState
+                if gsScore bestGameState < gsScore abortedNextGameState
+                  then do atomically $ writeTVar var $ abortedNextGameState
                           bruteforce (steps - 1) nextGameState var
                   else bruteforce (steps - 1) nextGameState var
     in sequence_ $ map handleAction $ filter (validate gameState) [ALeft, ARight, AUp, ADown, AWait, AAbort]

@@ -13,5 +13,8 @@ main = do
                       gsScore     = 0,
                       gsFinished  = False,
                       gsActions   = [] }
-    handleSignals gameState (bruteforce 5 gameState) output
+    let n = sizeX $ msField $ gsMineState gameState
+    let m = sizeY $ msField $ gsMineState gameState
+    let steps = (n * m) `div` 3
+    handleSignals gameState (bruteforce steps gameState) output
 
