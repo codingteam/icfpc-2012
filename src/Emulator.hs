@@ -14,15 +14,18 @@ lambdaAbortScore = 25
 lambdaLiftScore = 50
 
 emulate :: GameState -> Action -> GameState
-emulate state action =
-    let actions  = gsActions state
-        state'   = processAction state action
-        finished = gsFinished state'
-        finalState = if finished
-                     then state'
-                     else processFinishConditions state $ processEnvironment state'
+emulate gameState action =
+    let actions  = gsActions gameState
+        turns    = gsTurns gameState
+        gameState'   = processAction gameState action
+        finished = gsFinished gameState'
+        finalState =
+            if finished
+            then gameState'
+            else processFinishConditions gameState $ processEnvironment gameState'
 
-    in  finalState { gsActions = actions ++ [action] }
+    in  finalState { gsTurns = turns + 1,
+                     gsActions = actions ++ [action] }
 
 validate :: GameState -> Action -> Bool
 validate gameState action =
